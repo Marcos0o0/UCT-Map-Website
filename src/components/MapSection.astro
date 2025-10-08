@@ -1,0 +1,16 @@
+---
+import MapaInteractivo from './Map2D.astro';
+import Tour3D from './TourSection.astro';  // O TourSection.astro, según como lo hayas nombrado
+---
+
+<div class="px-6 pb-12">
+    <!-- Vista Mapa 2D -->
+    <section id="view-2d" class="transition-all duration-300">
+        <MapaInteractivo />
+    </section>
+
+    <!-- Vista Tour 3D -->
+    <section id="view-3d" class="hidden transition-all duration-300">
+        <Tour3D />
+    </section>
+</div>

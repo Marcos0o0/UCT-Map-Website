@@ -1,0 +1,346 @@
+---
+// Tour3D.astro
+---
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+
+<div class="max-w-7xl mx-auto">
+    <div class="rounded-xl shadow-lg overflow-hidden relative">
+        <!-- Controles superiores -->
+        <div class="absolute top-4 left-10 flex gap-2 z-[100] ">
+            <button id="prev-scene" class="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-2 hover:bg-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                <span class="font-medium">Anterior</span>
+            </button>
+            <button id="next-scene" class="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-2 hover:bg-white">
+                <span class="font-medium">Siguiente</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Info de escena actual -->
+        <div class="absolute top-4 right-4 z-[100]">
+            <div class="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
+                <p id="scene-title" class="font-semibold text-gray-800">Entrada principal</p>
+            </div>
+        </div>
+
+        <!-- Visor Pannellum -->
+        <div id="panorama" data-lenis-prevent class="w-full" style="height: 600px;"></div> 
+    </div>
+
+    <!-- Miniaturas de escenas -->
+    <div class="mt-6 bg-white rounded-xl shadow-sm p-6">
+        <h3 class="font-bold text-lg mb-4 text-gray-800">Recorrido Virtual</h3>
+        <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3">
+            <button class="scene-thumb group" data-scene="entrada">
+                <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-blue-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">1</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Entrada</p>
+            </button>
+            <button class="scene-thumb group" data-scene="ext_02">
+                <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-green-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">2</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Ext. 02</p>
+            </button>
+            <button class="scene-thumb group" data-scene="ext_03">
+                <div class="bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-orange-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">3</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Ext. 03</p>
+            </button>
+            <button class="scene-thumb group" data-scene="ext_04">
+                <div class="bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-purple-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">4</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Ext. 04</p>
+            </button>
+            <button class="scene-thumb group" data-scene="ext_05">
+                <div class="bg-gradient-to-br from-pink-400 to-pink-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-pink-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">5</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Ext. 05</p>
+            </button>
+            <button class="scene-thumb group" data-scene="ext_06">
+                <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-indigo-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">6</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Ext. 06</p>
+            </button>
+            <button class="scene-thumb group" data-scene="ext_07">
+                <div class="bg-gradient-to-br from-red-400 to-red-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-red-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">7</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Ext. 07</p>
+            </button>
+            <button class="scene-thumb group" data-scene="ext_08">
+                <div class="bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-teal-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">8</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Ext. 08</p>
+            </button>
+            <button class="scene-thumb group" data-scene="ext_09">
+                <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg overflow-hidden aspect-video mb-2 group-hover:ring-4 group-hover:ring-yellow-500 transition flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">9</span>
+                </div>
+                <p class="text-xs font-medium text-gray-700 text-center">Ext. 09</p>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sceneOrder = ['entrada', 'ext_02', 'ext_03', 'ext_04', 'ext_05', 'ext_06', 'ext_07', 'ext_08', 'ext_09'];
+    const sceneTitles = {
+        'entrada': 'Entrada principal',
+        'ext_02': 'Exterior 02',
+        'ext_03': 'Exterior 03',
+        'ext_04': 'Exterior 04',
+        'ext_05': 'Exterior 05',
+        'ext_06': 'Exterior 06',
+        'ext_07': 'Exterior 07',
+        'ext_08': 'Exterior 08',
+        'ext_09': 'Exterior 09'
+    };
+
+    let currentSceneIndex = 0;
+
+    const viewer = pannellum.viewer('panorama', {
+        default: {
+            firstScene: 'entrada',
+            sceneFadeDuration: 1000,
+            preview: "./load_img_uct.webp",
+            strings: {
+                loadButtonLabel: "Haz click aquí para cargar el tour"
+            }
+        },
+        scenes: {
+            entrada: {
+                title: "Entrada principal",
+                type: "equirectangular",
+                panorama: "./360_img/Ext_01.jpg",
+                pitch: 0,
+                yaw: 0,
+                minHfov: 80,
+                maxHfov: 120,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: -10,
+                        yaw: -3,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "ext_02"
+                    }
+                ]
+            },
+            ext_02: {
+                type: "equirectangular",
+                panorama: "./360_img/Ext_02.jpg",
+                pitch: 0,
+                yaw: 180,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: -2,
+                        yaw: 170,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "ext_03"
+                    }
+                ]
+            },
+            ext_03: {
+                type: "equirectangular",
+                panorama: "./360_img/Ext_03.jpg",
+                pitch: 0,
+                yaw: 0,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: -7,
+                        yaw: -10,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "ext_04"
+                    }
+                ]
+            },
+            ext_04: {
+                type: "equirectangular",
+                panorama: "./360_img/Ext_04.jpg",
+                pitch: 0,
+                yaw: 0,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: -5,
+                        yaw: -5,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "ext_05"
+                    }
+                ]
+            },
+            ext_05: {
+                type: "equirectangular",
+                panorama: "./360_img/Ext_05.jpg",
+                pitch: 0,
+                yaw: 0,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: -5,
+                        yaw: -5,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "ext_06"
+                    }
+                ]
+            },
+            ext_06: {
+                type: "equirectangular",
+                panorama: "./360_img/Ext_06.jpg",
+                pitch: 0,
+                yaw: 0,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: -4,
+                        yaw: -9,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "ext_07"
+                    }
+                ]
+            },
+            ext_07: {
+                type: "equirectangular",
+                panorama: "./360_img/Ext_07.jpg",
+                pitch: 0,
+                yaw: 0,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: -5,
+                        yaw: -5,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "ext_08"
+                    }
+                ]
+            },
+            ext_08: {
+                type: "equirectangular",
+                panorama: "./360_img/Ext_08.jpg",
+                pitch: 0,
+                yaw: 0,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: -5,
+                        yaw: -5,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "ext_09"
+                    }
+                ]
+            },
+            ext_09: {
+                type: "equirectangular",
+                panorama: "./360_img/Ext_09.jpg",
+                pitch: 0,
+                yaw: 180,
+                hfov: 120,
+                hotSpots: []
+            }
+        }
+    });
+
+    // Actualizar título y contador
+    function updateSceneInfo(sceneId) {
+        currentSceneIndex = sceneOrder.indexOf(sceneId);
+        document.getElementById('scene-title').textContent = sceneTitles[sceneId];
+        document.getElementById('current-scene-number').textContent = currentSceneIndex + 1;
+        document.getElementById('total-scenes').textContent = sceneOrder.length;
+    }
+
+    // Navegación anterior/siguiente
+    document.getElementById('prev-scene').addEventListener('click', () => {
+        if (currentSceneIndex > 0) {
+            const prevScene = sceneOrder[currentSceneIndex - 1];
+            viewer.loadScene(prevScene);
+            updateSceneInfo(prevScene);
+        }
+    });
+
+    document.getElementById('next-scene').addEventListener('click', () => {
+        if (currentSceneIndex < sceneOrder.length - 1) {
+            const nextScene = sceneOrder[currentSceneIndex + 1];
+            viewer.loadScene(nextScene);
+            updateSceneInfo(nextScene);
+        }
+    });
+
+    // Miniaturas
+    document.querySelectorAll('.scene-thumb').forEach(button => {
+        button.addEventListener('click', () => {
+            const sceneId = button.dataset.scene;
+            viewer.loadScene(sceneId);
+            updateSceneInfo(sceneId);
+        });
+    });
+
+    // Pantalla completa
+    document.getElementById('fullscreen-360').addEventListener('click', () => {
+        const panoramaDiv = document.getElementById('panorama');
+        if (panoramaDiv.requestFullscreen) {
+            panoramaDiv.requestFullscreen();
+        }
+    });
+
+    // Escuchar cambios de escena de Pannellum
+    viewer.on('scenechange', (sceneId) => {
+        updateSceneInfo(sceneId);
+    });
+
+    // Inicializar info
+    updateSceneInfo('entrada');
+});
+</script>
+
+<style>
+    /* Estilos para el visor */
+    #panorama {
+        background: #000;
+    }
+
+    /* Mejorar controles de Pannellum */
+    .pnlm-container {
+        border-radius: 12px;
+    }
+
+    /* Animación para miniaturas */
+    .scene-thumb {
+        transition: transform 0.2s;
+    }
+
+    .scene-thumb:hover {
+        transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+        #panorama {
+            height: 400px !important;
+        }
+    }
+</style>

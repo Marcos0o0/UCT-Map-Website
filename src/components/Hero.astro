@@ -1,0 +1,89 @@
+---
+// Hero.astro
+---
+
+<!-- Texto inicial -->
+<div class="text-center mb-6">
+  <h1 class="text-5xl font-bold mb-3">Explora el Campus UCT</h1>
+  <h2 class="text-xl text-gray-500/90">Navega por el campus San Francisco en nuestro mapa o visita nuestro tour virtual</h2>
+</div>
+
+<!-- Barra de búsqueda -->
+<div class="max-w-2xl mx-auto mb-6">
+    <div class="relative">
+        <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input
+            type="text"
+            placeholder="Buscar edificio, sala, cafetería..."
+            class="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none text-lg"/>
+    </div>
+</div>
+
+<!-- Selector de Vista -->
+<div class="flex justify-center gap-4 mb-12">
+    <button id="btn-2d" class="view-btn active flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+        </svg>
+        <span>Mapa 2D</span>
+    </button>
+    <button id="btn-3d" class="view-btn flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+        </svg>
+        <span>Tour Virtual 3D</span>
+    </button>
+</div>
+
+<script>
+    function switchView(view) {
+        // Actualizar botones
+        const btn2d = document.getElementById('btn-2d');
+        const btn3d = document.getElementById('btn-3d');
+        
+        if (view === '2d') {
+            btn2d?.classList.add('active');
+            btn3d?.classList.remove('active');
+        } else {
+            btn2d?.classList.remove('active');
+            btn3d?.classList.add('active');
+        }
+        
+        // Mostrar/ocultar vistas
+        const view2d = document.getElementById('view-2d');
+        const view3d = document.getElementById('view-3d');
+        
+        if (view === '2d') {
+            view2d?.classList.remove('hidden');
+            view3d?.classList.add('hidden');
+        } else {
+            view2d?.classList.add('hidden');
+            view3d?.classList.remove('hidden');
+        }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('btn-2d')?.addEventListener('click', () => switchView('2d'));
+        document.getElementById('btn-3d')?.addEventListener('click', () => switchView('3d'));
+    });
+</script>
+
+<style>
+    .view-btn {
+        background: white;
+        color: #374151;
+        border: 2px solid #e5e7eb;
+    }
+    .view-btn:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+    .view-btn.active {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+</style>

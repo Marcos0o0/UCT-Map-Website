@@ -165,7 +165,7 @@
         <div class="lg:col-span-3">
             <div id="map-wrapper" class="rounded-xl shadow-lg overflow-visible relative">
                 <div class="absolute top-4 right-4 flex gap-2 z-[500]" style="transform: translateX(-8px);">
-                    <button id="toggle-debug" class="bg-green-600 text-white px-3 py-2 rounded-lg shadow hover:shadow-md transition text-sm font-medium">
+                    <button id="toggle-debug" class="hidden bg-green-600 text-white px-3 py-2 rounded-lg shadow hover:shadow-md transition text-sm font-medium">
                         🛠️ Debug
                     </button>
                     <button id="zoom-in" class="bg-white p-2 rounded-lg shadow hover:shadow-md transition">
@@ -220,10 +220,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Coordenadas reales del campus UCT Temuco
     const campusBounds = {
-        // Coordenadas GPS reales de las esquinas del campus
-        topLeft: { lat: -38.73700459666474, lng: -72.60205038945038 },
-        bottomRight: { lat: -38.73860301490445, lng: -72.60146566790254 }
+    north: -38.73700459666474,  // Límite norte (menor valor = más al norte)
+    south: -38.73860301490445,  // Límite sur
+    west: -72.60205038945038,   // Límite oeste
+    east: -72.60146566790254    // Límite este
     };
+    const GPS_TOLERANCE_METERS = 50000; // Tolerancia de 50 metros
+
 
     // Red de caminos del campus
     const pathNetwork = {
@@ -295,129 +298,104 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Convertir coordenadas GPS a coordenadas del mapa
     function gpsToMapCoords(lat, lng) {
-        if (!campusBounds || !width || !height) return null;
-
-        // Verificar si está dentro del campus
-        if (lat > campusBounds.topLeft.lat || lat < campusBounds.bottomRight.lat ||
-            lng < campusBounds.topLeft.lng || lng > campusBounds.bottomRight.lng) {
-            return null; // Fuera del rango
-        }
-
-        // Calcular posición relativa (0 a 1)
-        const latRange = campusBounds.topLeft.lat - campusBounds.bottomRight.lat;
-        const lngRange = campusBounds.bottomRight.lng - campusBounds.topLeft.lng;
-        
-        const relY = (campusBounds.topLeft.lat - lat) / latRange;
-        const relX = (lng - campusBounds.topLeft.lng) / lngRange;
-
-        // Convertir a coordenadas del mapa
-        return [relY * height, relX * width];
+    if (!campusBounds || !width || !height) {
+        console.warn('❌ Mapa no inicializado');
+        return null;
     }
+
+    console.log(`🔍 Verificando coordenadas GPS: ${lat}, ${lng}`);
+
+    // Calcular tolerancia en grados (aproximado)
+    const latTolerance = GPS_TOLERANCE_METERS / 111000; // 1 grado lat ≈ 111km
+    const lngTolerance = GPS_TOLERANCE_METERS / (111000 * Math.cos(lat * Math.PI / 180));
+
+    // Verificar si está dentro del campus (con tolerancia)
+    const isInBounds = 
+        lat <= (campusBounds.north + latTolerance) &&
+        lat >= (campusBounds.south - latTolerance) &&
+        lng >= (campusBounds.west - lngTolerance) &&
+        lng <= (campusBounds.east + lngTolerance);
+
+    if (!isInBounds) {
+        console.warn(`⚠️ Fuera del campus: lat=${lat}, lng=${lng}`);
+        console.warn(`Campus bounds: N=${campusBounds.north}, S=${campusBounds.south}, W=${campusBounds.west}, E=${campusBounds.east}`);
+        return null;
+    }
+
+    // Calcular posición relativa (0 a 1)
+    const latRange = campusBounds.north - campusBounds.south;
+    const lngRange = campusBounds.east - campusBounds.west;
+    
+    const relY = (campusBounds.north - lat) / latRange;
+    const relX = (lng - campusBounds.west) / lngRange;
+
+    // Convertir a coordenadas del mapa
+    const mapCoords = [relY * height, relX * width];
+    console.log(`✅ Coordenadas en el mapa: [${mapCoords[0].toFixed(2)}, ${mapCoords[1].toFixed(2)}]`);
+    
+    return mapCoords;
+}
+
 
     // Obtener ubicación del usuario
     function getUserLocation() {
-        if (!navigator.geolocation) {
-            alert('Tu navegador no soporta geolocalización');
-            return;
-        }
-
-        const locationBtn = document.getElementById('get-location-btn');
-        if (locationBtn) {
-            locationBtn.disabled = true;
-            locationBtn.innerHTML = `
-                <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                Ubicando...
-            `;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude, accuracy } = position.coords;
-                console.log(`📍 Ubicación obtenida: ${latitude}, ${longitude} (±${accuracy}m)`);
-
-                const mapCoords = gpsToMapCoords(latitude, longitude);
-
-                if (!mapCoords) {
-                    alert('⚠️ Estás fuera del campus. La geolocalización solo funciona dentro del campus UCT.');
-                    if (locationBtn) {
-                        locationBtn.disabled = false;
-                        locationBtn.innerHTML = `
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            Mi Ubicación
-                        `;
-                    }
-                    return;
-                }
-
-                userLocation = mapCoords;
-                showUserLocation(mapCoords, accuracy);
-
-                // Actualizar selector de ruta
-                const routeFrom = document.getElementById('route-from');
-                if (routeFrom) {
-                    let option = routeFrom.querySelector('option[value="__user_location__"]');
-                    if (!option) {
-                        option = document.createElement('option');
-                        option.value = '__user_location__';
-                        routeFrom.insertBefore(option, routeFrom.firstChild);
-                    }
-                    option.textContent = '📍 Mi Ubicación';
-                    routeFrom.value = '__user_location__';
-                }
-
-                if (locationBtn) {
-                    locationBtn.disabled = false;
-                    locationBtn.innerHTML = `
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
-                        </svg>
-                        Actualizar Ubicación
-                    `;
-                }
-
-                console.log('✅ Ubicación en el mapa:', mapCoords);
-            },
-            (error) => {
-                console.error('Error de geolocalización:', error);
-                let message = 'No se pudo obtener tu ubicación. ';
-                
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        message += 'Debes permitir el acceso a tu ubicación.';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message += 'Ubicación no disponible.';
-                        break;
-                    case error.TIMEOUT:
-                        message += 'Tiempo de espera agotado.';
-                        break;
-                }
-                
-                alert(message);
-                
-                if (locationBtn) {
-                    locationBtn.disabled = false;
-                    locationBtn.innerHTML = `
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Mi Ubicación
-                    `;
-                }
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            }
-        );
+    if (!navigator.geolocation) {
+        alert('❌ Tu navegador no soporta geolocalización');
+        return;
     }
+
+    // Verificar si estamos en HTTPS (necesario en producción)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        alert('⚠️ La geolocalización requiere HTTPS. Vercel usa HTTPS automáticamente.');
+    }
+
+    const locationBtn = document.getElementById('get-location-btn');
+    if (locationBtn) {
+        locationBtn.disabled = true;
+        locationBtn.innerHTML = `
+            <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Ubicando...
+        `;
+    }
+
+    console.log('📍 Solicitando ubicación GPS...');
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const { latitude, longitude, accuracy } = position.coords;
+            console.log(`✅ GPS obtenido: ${latitude}, ${longitude} (±${accuracy}m)`);
+
+            const mapCoords = gpsToMapCoords(latitude, longitude);
+
+            if (!mapCoords) {
+                // Mostrar modal más informativo
+                showOutOfBoundsModal(latitude, longitude, accuracy);
+                resetLocationButton(locationBtn);
+                return;
+            }
+
+            // ✅ Ubicación válida
+            userLocation = mapCoords;
+            showUserLocation(mapCoords, accuracy);
+            updateRouteSelector();
+            resetLocationButton(locationBtn, true);
+
+            console.log('✅ Ubicación guardada correctamente');
+        },
+        (error) => {
+            console.error('❌ Error de geolocalización:', error);
+            handleLocationError(error, locationBtn);
+        },
+        {
+            enableHighAccuracy: true,  // Usar GPS de alta precisión
+            timeout: 15000,            // Aumentar timeout a 15 segundos
+            maximumAge: 0              // No usar caché
+        }
+    );
+}
+
 
     // Mostrar ubicación del usuario en el mapa
     function showUserLocation(coords, accuracy) {
@@ -456,6 +434,90 @@ document.addEventListener('DOMContentLoaded', function() {
             duration: 0.8
         });
     }
+
+    function showOutOfBoundsModal(lat, lng, accuracy) {
+    const distance = calculateDistanceFromCampus(lat, lng);
+    
+    alert(`⚠️ FUERA DEL CAMPUS\n\n` +
+          `Tu ubicación está a ~${distance}m del campus UCT.\n\n` +
+          `📍 Tu posición: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n` +
+          `🎯 Precisión: ±${Math.round(accuracy)}m\n\n` +
+          `La navegación solo funciona dentro del campus.`);
+    }
+
+    function calculateDistanceFromCampus(lat, lng) {
+        const centerLat = (campusBounds.north + campusBounds.south) / 2;
+        const centerLng = (campusBounds.west + campusBounds.east) / 2;
+
+        const R = 6371000; // Radio de la Tierra en metros
+        const dLat = (lat - centerLat) * Math.PI / 180;
+        const dLng = (lng - centerLng) * Math.PI / 180;
+
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(centerLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return Math.round(R * c);
+    }
+
+    function resetLocationButton(btn, success = false) {
+    if (!btn) return;
+    
+    btn.disabled = false;
+    btn.innerHTML = success ? `
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+        </svg>
+        Actualizar Ubicación
+    ` : `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        Mi Ubicación
+    `;
+}
+
+// ✅ FUNCIÓN MEJORADA: Manejo de errores
+function handleLocationError(error, locationBtn) {
+    let message = '❌ No se pudo obtener tu ubicación.\n\n';
+    
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            message += '🚫 Permiso denegado.\n\n' +
+                      'Para usar la geolocalización:\n' +
+                      '1. Ve a la configuración de tu navegador\n' +
+                      '2. Permite el acceso a ubicación para este sitio\n' +
+                      '3. Recarga la página';
+            break;
+        case error.POSITION_UNAVAILABLE:
+            message += '📡 Ubicación no disponible.\n' +
+                      'Asegúrate de tener el GPS activado.';
+            break;
+        case error.TIMEOUT:
+            message += '⏱️ Tiempo de espera agotado.\n' +
+                      'Intenta de nuevo en un área con mejor señal.';
+            break;
+        default:
+            message += '⚠️ Error desconocido. Código: ' + error.code;
+    }
+
+    alert(message);
+    resetLocationButton(locationBtn);
+    }
+
+    // ✅ SOLICITUD AUTOMÁTICA AL CARGAR (opcional pero recomendado)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Esperar 2 segundos después de cargar para no ser invasivo
+        setTimeout(() => {
+            if (navigator.geolocation && !userLocation) {
+                console.log('🔄 Solicitando ubicación automáticamente...');
+                getUserLocation();
+            }
+        }, 2000);
+    });
+
 
     // Activar seguimiento continuo de ubicación
     function startLocationTracking() {

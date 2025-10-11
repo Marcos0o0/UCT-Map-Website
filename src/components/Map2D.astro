@@ -1,205 +1,406 @@
----
-// Componente Map2D.astro - Con Sistema de Rutas
----
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
 
-<!-- Componente Mapa -->
-<div class="max-w-[90rem] mx-auto pt-44">
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Panel Lateral -->
-        <div class="lg:col-span-1 space-y-4">
-            <!-- Panel de Rutas -->
-            <div id="route-panel" class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg text-gray-800">¿Donde deseas ir?</h3>
-                    <button id="clear-route" class="text-gray-400 hover:text-red-600 transition hidden">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
+        /* Asegurar que el body no tenga overflow en móvil */
+        @media (max-width: 1023px) {
+            body {
+                overflow: hidden;
+                position: fixed;
+                width: 100%;
+                height: 100vh;
+            }
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 4px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .custom-checkbox input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .custom-checkbox input:checked ~ .checkmark {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .custom-checkbox input:focus ~ .checkmark {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        @keyframes marker-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .marker-pulse {
+            animation: marker-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes marker-pop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .marker-pop {
+            animation: marker-pop 0.3s ease-out;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.6); }
+        }
+
+        .pulse-green {
+            animation: pulse-green 2s infinite;
+        }
+
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+
+        .leaflet-container {
+            background: transparent !important;
+        }
+
+        .mobile-panel-handle:active {
+            cursor: grabbing;
+        }
+
+        /* Asegurar que el contenedor del mapa móvil sea visible */
+        #map-container-mobile {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        /* Panel móvil debe estar por encima del mapa */
+        .mobile-panel {
+            transform: translateY(calc(100% - 80px));
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mobile-panel.expanded {
+            transform: translateY(0) !important;
+        }
+
+        
+    </style>
+</head>
+<body class="m-0 p-0 overflow-x-hidden">
+
+<!-- VERSIÓN MÓVIL -->
+<div class="lg:hidden">
+    <!-- Botón flotante ubicación -->
+    <button id="location-fab" title="Obtener mi ubicación" class="fixed bottom-24 right-5 z-[1000] bg-blue-600 text-white p-4 rounded-full shadow-[0_4px_12px_rgba(37,99,235,0.4)] transition-all active:scale-95">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+    </button>
+
+    <!-- Panel deslizable -->
+    <div id="mobile-panel" class="mobile-panel fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] z-[999] max-h-[85vh] overflow-hidden">
+        <div class="mobile-panel-handle w-10 h-1 bg-gray-300 rounded-full my-3 mx-auto cursor-grab transition-colors hover:bg-gray-400"></div>
+        
+        <div class="px-6 pb-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900">Campus San Francisco UCT</h2>
+            <p class="text-sm text-gray-600"></p>
+        </div>
+
+        <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-180px)]">
+            <!-- Barra de búsqueda -->
+<div class="bg-white rounded-xl shadow-sm p-4">
+    <div class="relative">
+        <input 
+            type="text" 
+            id="search-input-mobile" 
+            placeholder="Buscar lugar..." 
+            class="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+        />
+        <button id="clear-search-mobile" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            ✕
+        </button>
+    </div>
+    <div id="search-results-mobile" class="hidden mt-2 max-h-60 overflow-y-auto bg-white border-2 border-gray-200 rounded-lg"></div>
+</div>
+            <!-- Rutas -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border-2 border-blue-200">
+                <h3 class="font-bold mb-3 text-gray-900">¿Dónde ir?</h3>
+                <div class="space-y-2">
+                    <select id="route-from-mobile" class="w-full px-3 py-2.5 bg-white border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 text-base">
+                        <option value="">Mi ubicación</option>
+                    </select>
+                    <select id="route-to-mobile" class="w-full px-3 py-2.5 bg-white border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 text-base">
+                        <option value="">Seleccionar destino</option>
+                    </select>
+                    <button id="calculate-route-mobile" class="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition active:scale-98">
+                        Iniciar Ruta
                     </button>
-                </div>
-
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 mb-1 block">Desde:</label>
-                        <select id="route-from" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
-                            <option value="">Entrada Principal</option>
-                        </select>
-                    </div>
-
-                    <div class="flex justify-center">
-                        <button id="swap-route" class="p-2 hover:bg-gray-100 rounded-lg transition">
-                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 mb-1 block">Hasta:</label>
-                        <select id="route-to" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
-                            <option value="">Seleccionar destino</option>
-                        </select>
-                    </div>
-
-                    <button id="calculate-route" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        <img class="w-6 h-6" src="markers/walk.svg" alt="">
-                        <span id="route-btn-text" class="">Iniciar</span>
-                    </button>
-
-                    <div id="route-info" class="hidden p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <div class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div class="flex-1">
-                                <p class="text-sm font-semibold text-blue-900 mb-1">Información de la ruta</p>
-                                <p id="route-distance" class="text-sm text-blue-800"></p>
-                                <p id="route-time" class="text-sm text-blue-800"></p>
-                            </div>
-                        </div>
+                    <div id="route-info-mobile" class="hidden p-3 bg-white rounded-xl border-2 border-blue-200">
+                        <p id="route-distance-mobile" class="text-sm font-medium text-gray-900"></p>
+                        <p id="route-time-mobile" class="text-sm text-gray-600"></p>
+                        <button id="clear-route-mobile" class="mt-2 text-xs text-red-600 font-medium hover:text-red-700">Limpiar</button>
                     </div>
                 </div>
             </div>
 
             <!-- Filtros -->
-            <div class="bg-gray-50 rounded-xl shadow-sm p-6">
-                <h3 class="font-bold text-lg mb-4 text-gray-800">Filtros</h3>
-                
-                <div class="pb-3">
-                    <label class="custom-checkbox">
-                        <input type="checkbox" id="filter-open-now" class="special-filter">
-                        <span class="checkmark"></span>
-                        <span class="label-text font-semibold">Abierto Ahora</span>
+            <details class="bg-gray-50 rounded-2xl overflow-hidden">
+                <summary class="px-4 py-3 font-bold cursor-pointer list-none hover:bg-gray-100 text-gray-900">Filtros</summary>
+                <div class="px-4 pb-4 space-y-2">
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="edificio" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Edificios Académicos <span class="text-gray-400">(10)</span></span>                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="libreria" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Bibliotecas</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="comer" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Cafeterías</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="baños" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Baños</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="estacionamiento" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Estacionamientos</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="bicicletas" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Est. Bicicletas</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="gym" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Gimnasio</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="calistenia" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Calistenia</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="impresion" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Impresiones</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="daas" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">DAAS</span>
+                    </label>
+                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                        <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="tesoreria" checked>
+                        <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                        <span class="label-text ml-2.5 text-gray-700 text-sm">Tesorería</span>
                     </label>
                 </div>
-
-                <div>
-                    <hr class="border-solid border-gray-400/90 mb-4">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="edificio" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Edificios Académicos</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="libreria" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Bibliotecas</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="comer" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Cafeterías</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="baños" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Baños</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="estacionamiento" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Estacionamientos</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="bicicletas" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Est. Bicicletas</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="gym" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Gimnasio</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="calistenia" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Calistenia</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="impresion" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Impresiones</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="daas" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">DAAS</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" class="marker-filter" data-type="tesoreria" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Tesorería</span>
-                    </label>
-                </div>
-
-                <div class="flex gap-2 mt-4">
-                    <button id="select-all" class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition font-medium">
-                        Todos
-                    </button>
-                    <button id="deselect-all" class="flex-1 px-3 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition font-medium">
-                        Ninguno
-                    </button>
-                </div>
-            </div>
-
-            <!-- Panel de Información -->
-            <div id="info-panel" class="bg-white rounded-xl shadow-sm p-6 hidden">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="font-bold text-lg text-gray-800">Información</h3>
-                    <button id="close-info-panel" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                <div id="info-content"></div>
-            </div>
+            </details>
         </div>
+    </div>
+</div>
 
-        <!-- Mapa Principal -->
-        <div class="lg:col-span-3">
-            <div id="map-wrapper" class="rounded-xl shadow-lg overflow-visible relative">
-                <div class="absolute top-4 right-4 flex gap-2 z-[500]" style="transform: translateX(-8px);">
-                    <button id="toggle-debug" class="hidden bg-green-600 text-white px-3 py-2 rounded-lg shadow hover:shadow-md transition text-sm font-medium">
-                        🛠️ Debug
-                    </button>
-                    <button id="zoom-in" class="bg-white p-2 rounded-lg shadow hover:shadow-md transition">
+<!-- VERSIÓN DESKTOP -->
+<div class="hidden lg:block">
+    <div class="max-w-[90rem] mx-auto pt-20">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Panel Lateral Desktop -->
+            <div class="lg:col-span-1 space-y-4 max-h-screen overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <!-- Barra de búsqueda -->
+                <div class="bg-white rounded-xl shadow-sm p-4">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="search-input-desktop" 
+                            placeholder="Buscar lugar..." 
+                            class="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+                        />
+                        <button id="clear-search-desktop" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            ✕
+                        </button>
+                    </div>
+                    <div id="search-results-desktop" class="hidden mt-2 max-h-60 overflow-y-auto bg-white border-2 border-gray-200 rounded-lg"></div>
+                </div>
+                <!-- Ubicación -->
+                <div class="bg-white rounded-xl shadow-sm p-4">
+                    <button id="get-location-btn-desktop" title="Obtener mi ubicación" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                    </button>
-                    <button id="zoom-out" class="bg-white p-2 rounded-lg shadow hover:shadow-md transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                        </svg>
-                    </button>
-                    <button id="fullscreen-btn" class="bg-white p-2 rounded-lg shadow hover:shadow-md transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-                        </svg>
+                        Mi Ubicación
                     </button>
                 </div>
-                
-                <div id="enhanced-map" class="w-full rounded-xl" style="height: 600px;"></div>
-                
-                <button id="exit-fullscreen" class="hidden absolute top-4 right-4 z-[1000] px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    Salir
-                </button>
+
+                <!-- Rutas Desktop -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="font-bold text-lg mb-4">¿Dónde ir?</h3>
+                    <div class="space-y-3">
+                        <select id="route-from-desktop" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
+                            <option value="">Entrada Principal</option>
+                        </select>
+                        <select id="route-to-desktop" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
+                            <option value="">Seleccionar destino</option>
+                        </select>
+                        <button id="calculate-route-desktop" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                            Calcular Ruta
+                        </button>
+                        <div id="route-info-desktop" class="hidden p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <p id="route-distance-desktop" class="text-sm font-medium text-blue-900"></p>
+                            <p id="route-time-desktop" class="text-sm text-blue-700"></p>
+                            <button id="clear-route-desktop" class="mt-2 text-xs text-red-600 font-medium hover:text-red-700">Limpiar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros Desktop -->
+                <div class="bg-gray-50 rounded-xl shadow-sm p-6">
+                    <h3 class="font-bold text-lg mb-4">Filtros</h3>
+                    <div class="space-y-2">
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="edificio" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Edificios Académicos <span class="text-gray-400">(10)</span></span>                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="libreria" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Bibliotecas</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="comer" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Cafeterías</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="baños" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Baños</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="estacionamiento" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Estacionamientos</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="bicicletas" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Est. Bicicletas</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="gym" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Gimnasio</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="calistenia" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Calistenia</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="impresion" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Impresiones</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="daas" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">DAAS</span>
+                        </label>
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="tesoreria" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span class="label-text ml-2.5 text-gray-700 text-sm">Tesorería</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mapa Desktop -->
+            <div class="lg:col-span-3">
+                <div class="w-full rounded-xl relative h-[600px] bg-gray-100">
+                    <div id="enhanced-map" class="w-full h-full rounded-xl"></div>
+                    
+                    <!-- Controles de zoom desktop -->
+                    <div class="absolute top-4 right-4 flex flex-col gap-2 z-[500]">
+                        <button class="zoom-btn bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition" data-action="in" title="Acercar">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </button>
+                        <button class="zoom-btn bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition" data-action="out" title="Alejar">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                            </svg>
+                        </button>
+                        <button id="recenter-btn-desktop" class="bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition" title="Centrar mapa">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                            </svg>
+                        </button>
+                        <button id="fullscreen-btn-desktop" class="bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition" title="Pantalla Completa">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- CONTENEDOR DEL MAPA MÓVIL -->
+<div id="map-container-mobile" class="lg:hidden fixed inset-0 z-[1]">
+    <div id="enhanced-map-mobile" class="w-full h-full"></div>
+    
+    <!-- Controles zoom móvil -->
+    <div class="absolute top-4 right-4 flex flex-col gap-2 z-[500]">
+        <button class="zoom-btn bg-white p-3 rounded-full shadow-lg active:scale-95 transition" data-action="in" title="Acercar">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+        </button>
+        <button class="zoom-btn bg-white p-3 rounded-full shadow-lg active:scale-95 transition" data-action="out" title="Alejar">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+            </svg>
+        </button>
+        <button id="fullscreen-btn-mobile" class="bg-white p-3 rounded-full shadow-lg active:scale-95 transition" title="Pantalla Completa">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+            </svg>
+        </button>
+    </div>
+</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let map;
@@ -212,23 +413,18 @@ document.addEventListener('DOMContentLoaded', function() {
     let routeMarkers = [];
     let routeAnimationInterval = null;
     let hiddenOriginalMarkers = [];
-    let pathNodes = [];
-    let debugMode = false;
-    let userLocationMarker = null; // Marcador de ubicación del usuario
-    let userLocation = null; // Coordenadas del usuario en el mapa
-    let watchId = null; // ID para seguimiento de ubicación
+    let userLocationMarker = null;
+    let userLocation = null;
+    let watchId = null;
 
-    // Coordenadas reales del campus UCT Temuco
     const campusBounds = {
         north: -38.73702544894389,
         south: -38.73849415351934,
         west: -72.6028524900271,
         east: -72.60083546890792
     };
-    const GPS_TOLERANCE_METERS = 30; // Tolerancia de 30 metros
+    const GPS_TOLERANCE_METERS = 30;
 
-
-    // Red de caminos del campus
     const pathNetwork = {
         nodes: {
             'entrada': null,
@@ -296,238 +492,179 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const mainEntrance = { name: "Entrada Principal", pos: null };
 
-    // Convertir coordenadas GPS a coordenadas del mapa
     function gpsToMapCoords(lat, lng) {
-    if (!campusBounds || !width || !height) {
-        console.warn('❌ Mapa no inicializado');
-        return null;
+        if (!campusBounds || !width || !height) return null;
+
+        const latTolerance = GPS_TOLERANCE_METERS / 111000;
+        const lngTolerance = GPS_TOLERANCE_METERS / (111000 * Math.cos(lat * Math.PI / 180));
+
+        const isInBounds = 
+            lat <= (campusBounds.north + latTolerance) &&
+            lat >= (campusBounds.south - latTolerance) &&
+            lng >= (campusBounds.west - lngTolerance) &&
+            lng <= (campusBounds.east + lngTolerance);
+
+        if (!isInBounds) return null;
+
+        const latRange = campusBounds.north - campusBounds.south;
+        const lngRange = campusBounds.east - campusBounds.west;
+        
+        const relY = (campusBounds.north - lat) / latRange;
+        const relX = (lng - campusBounds.west) / lngRange;
+
+        return [relY * height, relX * width];
     }
 
-    console.log(`🔍 Verificando coordenadas GPS: ${lat}, ${lng}`);
-
-    // Calcular tolerancia en grados (aproximado)
-    const latTolerance = GPS_TOLERANCE_METERS / 111000; // 1 grado lat ≈ 111km
-    const lngTolerance = GPS_TOLERANCE_METERS / (111000 * Math.cos(lat * Math.PI / 180));
-
-    // Verificar si está dentro del campus (con tolerancia)
-    const isInBounds = 
-        lat <= (campusBounds.north + latTolerance) &&
-        lat >= (campusBounds.south - latTolerance) &&
-        lng >= (campusBounds.west - lngTolerance) &&
-        lng <= (campusBounds.east + lngTolerance);
-
-    if (!isInBounds) {
-        console.warn(`⚠️ Fuera del campus: lat=${lat}, lng=${lng}`);
-        console.warn(`Campus bounds: N=${campusBounds.north}, S=${campusBounds.south}, W=${campusBounds.west}, E=${campusBounds.east}`);
-        // Calcular distancia al centro del campus
-        const centerLat = -38.73763636676646;
-        const centerLng = -72.6017205978565;
-        const distance = calculateDistanceGPS(lat, lng, centerLat, centerLng);
-
-        console.warn(`Distancia al centro del campus: ${distance} metros`);
-        return null;
+    function calculateDistanceGPS(lat1, lng1, lat2, lng2) {
+        const R = 6371000;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+        
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
     }
 
-    // Calcular posición relativa (0 a 1)
-    const latRange = campusBounds.north - campusBounds.south;
-    const lngRange = campusBounds.east - campusBounds.west;
-    
-    const relY = (campusBounds.north - lat) / latRange;
-    const relX = (lng - campusBounds.west) / lngRange;
-
-    // Convertir a coordenadas del mapa
-    const mapCoords = [relY * height, relX * width];
-    console.log(`✅ Coordenadas en el mapa: [${mapCoords[0].toFixed(2)}, ${mapCoords[1].toFixed(2)}]`);
-    console.log(`   Posición relativa: Y=${(relY*100).toFixed(1)}%, X=${(relX*100).toFixed(1)}%`);
-
-    
-    return mapCoords;
-}
-
-function calculateDistanceGPS(lat1, lng1, lat2, lng2) {
-    const R = 6371000; // Radio de la Tierra en metros
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-}
-
-
-if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-    console.error('❌ HTTPS requerido. URL actual:', location.href);
-    alert('Este sitio requiere HTTPS para geolocalización');
-}
-
-    // Obtener ubicación del usuario
     function getUserLocation() {
-    if (!navigator.geolocation) {
-        alert('❌ Tu navegador no soporta geolocalización');
-        return;
-    }
+        if (!navigator.geolocation) {
+            alert('Tu navegador no soporta geolocalización');
+            return;
+        }
 
-    const locationBtn = document.getElementById('get-location-btn');
-    if (locationBtn) {
-        locationBtn.disabled = true;
-        locationBtn.innerHTML = `
-            <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            Ubicando...
-        `;
-    }
+        const locationBtn = document.getElementById('location-fab') || document.getElementById('get-location-btn-desktop');
+        
+        if (locationBtn) {
+            locationBtn.disabled = true;
+            locationBtn.innerHTML = `
+                <div class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span>Calculando...</span>
+                </div>
+            `;        
+        }
 
-    console.log('📍 Solicitando ubicación GPS...');
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude, accuracy } = position.coords;
+                const mapCoords = gpsToMapCoords(latitude, longitude);
 
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const { latitude, longitude, accuracy } = position.coords;
-            console.log(`✅ GPS obtenido: ${latitude}, ${longitude} (±${accuracy}m)`);
+                if (!mapCoords) {
+                    const centerLat = -38.73763636676646;
+                    const centerLng = -72.6017205978565;
+                    const distance = calculateDistanceGPS(latitude, longitude, centerLat, centerLng);
+                    
+                    alert(
+                        `FUERA DEL CAMPUS UCT\n\n` +
+                        `Estás a ~${Math.round(distance)} metros del campus.\n\n` +
+                        `La navegación solo funciona dentro del campus UCT Temuco.`
+                    );
+                    
+                    if (locationBtn) {
+                        locationBtn.disabled = false;
+                        locationBtn.innerHTML = `
+                            <svg class="w-7 h-7 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        `;
+                    }
+                    return;
+                }
 
-            // Intentar convertir a coordenadas del mapa
-            const mapCoords = gpsToMapCoords(latitude, longitude);
+                userLocation = mapCoords;
+                showUserLocation(mapCoords, accuracy);
 
-            if (!mapCoords) {
-                // Calcular distancia al campus
-                const centerLat = -38.73763636676646;
-                const centerLng = -72.6017205978565;
-                const distance = calculateDistanceGPS(latitude, longitude, centerLat, centerLng);
+                const routeFromMobile = document.getElementById('route-from-mobile');
+                const routeFromDesktop = document.getElementById('route-from-desktop');
                 
-                alert(
-                    `⚠️ FUERA DEL CAMPUS UCT\n\n` +
-                    `Estás a ~${Math.round(distance)} metros del campus.\n\n` +
-                    `📍 Tu ubicación:\n` +
-                    `   Lat: ${latitude.toFixed(6)}\n` +
-                    `   Lng: ${longitude.toFixed(6)}\n` +
-                    `   Precisión: ±${Math.round(accuracy)}m\n\n` +
-                    `La navegación solo funciona dentro del campus UCT Temuco.`
-                );
+                [routeFromMobile, routeFromDesktop].forEach(select => {
+                    if (!select) return;
+                    let option = select.querySelector('option[value="__user_location__"]');
+                    if (!option) {
+                        option = document.createElement('option');
+                        option.value = '__user_location__';
+                        select.insertBefore(option, select.firstChild);
+                    }
+                    option.textContent = 'Mi Ubicación';
+                    select.value = '__user_location__';
+                });
+
+                if (locationBtn) {
+                    locationBtn.disabled = false;
+                    locationBtn.classList.add('pulse-green');
+                    if (locationBtn.id === 'location-fab') {
+                        locationBtn.innerHTML = `
+                            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+                            </svg>
+                        `;
+                    } else {
+                        locationBtn.innerHTML = `
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+                            </svg>
+                            Mi Ubicación
+                        `;
+                    }
+                }
+            },
+            (error) => {
+                let message = 'No se pudo obtener tu ubicación.\n\n';
+                
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message += 'Permiso denegado.\n\n';
+                        message += 'Ve a Configuración → Permisos del sitio → Ubicación';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message += 'Señal GPS no disponible.\n\n';
+                        message += 'Asegúrate de estar al aire libre o cerca de una ventana.';
+                        break;
+                    case error.TIMEOUT:
+                        message += 'Tiempo de espera agotado.\n\n';
+                        message += 'Verifica tu conexión y vuelve a intentar.';
+                        break;
+                }
+                
+                alert(message);
                 
                 if (locationBtn) {
                     locationBtn.disabled = false;
-                    locationBtn.innerHTML = `
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Mi Ubicación
-                    `;
+                    if (locationBtn.id === 'location-fab') {
+                        locationBtn.innerHTML = `
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        `;
+                    }
                 }
-                return;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
             }
+        );
+    }
 
-            // ✅ Ubicación válida dentro del campus
-            userLocation = mapCoords;
-            showUserLocation(mapCoords, accuracy);
-
-            // Actualizar selector de ruta
-            const routeFrom = document.getElementById('route-from');
-            if (routeFrom) {
-                let option = routeFrom.querySelector('option[value="__user_location__"]');
-                if (!option) {
-                    option = document.createElement('option');
-                    option.value = '__user_location__';
-                    routeFrom.insertBefore(option, routeFrom.firstChild);
-                }
-                option.textContent = '📍 Mi Ubicación';
-                routeFrom.value = '__user_location__';
-            }
-
-            if (locationBtn) {
-                locationBtn.disabled = false;
-                locationBtn.innerHTML = `
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
-                    </svg>
-                    Actualizar Ubicación
-                `;
-            }
-
-            console.log('✅ Ubicación guardada exitosamente');
-        },
-        (error) => {
-            console.error('❌ Error de geolocalización:', error);
-            
-            let message = '❌ No se pudo obtener tu ubicación.\n\n';
-            
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    message += 
-                        '🚫 PERMISO DENEGADO\n\n' +
-                        'Para activar la ubicación:\n' +
-                        '1. Ve a la configuración de tu navegador\n' +
-                        '2. Busca "Permisos del sitio" o "Ubicación"\n' +
-                        '3. Permite el acceso para este sitio\n' +
-                        '4. Recarga la página';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    message += 
-                        '📡 UBICACIÓN NO DISPONIBLE\n\n' +
-                        '• Asegúrate de tener GPS activado\n' +
-                        '• Intenta estar en un lugar con buena señal\n' +
-                        '• Si estás en interiores, acércate a una ventana';
-                    break;
-                case error.TIMEOUT:
-                    message += 
-                        '⏱️ TIEMPO AGOTADO\n\n' +
-                        'La búsqueda de GPS tardó demasiado.\n' +
-                        'Intenta de nuevo.';
-                    break;
-                default:
-                    message += `Error desconocido (código ${error.code})`;
-            }
-            
-            alert(message);
-            
-            if (locationBtn) {
-                locationBtn.disabled = false;
-                locationBtn.innerHTML = `
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    Mi Ubicación
-                `;
-            }
-        },
-        {
-            enableHighAccuracy: true,  // Usar GPS de alta precisión
-            timeout: 15000,            // 15 segundos de timeout
-            maximumAge: 0              // No usar ubicaciones en caché
-        }
-    );
-}
-
-console.log('🗺️ Campus UCT Temuco - Configuración cargada');
-console.log('Límites del campus:');
-console.log(`  Norte: ${campusBounds.north}°`);
-console.log(`  Sur:   ${campusBounds.south}°`);
-console.log(`  Oeste: ${campusBounds.west}°`);
-console.log(`  Este:  ${campusBounds.east}°`);
-console.log(`  Centro: -38.73763636676646, -72.6017205978565`);
-console.log(`  Tolerancia: ±${GPS_TOLERANCE_METERS}m`);
-
-
-
-    // Mostrar ubicación del usuario en el mapa
     function showUserLocation(coords, accuracy) {
         if (!map) return;
 
-        // Remover marcador anterior
         if (userLocationMarker) {
             map.removeLayer(userLocationMarker);
         }
 
-        // Crear icono personalizado para ubicación del usuario
         const userIcon = L.divIcon({
             html: `
-                <div class="user-location-marker">
-                    <div class="user-location-dot"></div>
-                    <div class="user-location-pulse"></div>
+                <div class="relative w-10 h-10">
+                    <div class="absolute inset-0 bg-blue-500 rounded-full opacity-50 animate-ping"></div>
+                    <div class="absolute inset-2 bg-blue-600 rounded-full border-2 border-white shadow-lg"></div>
                 </div>
             `,
             className: '',
@@ -539,140 +676,17 @@ console.log(`  Tolerancia: ±${GPS_TOLERANCE_METERS}m`);
             .addTo(map)
             .bindPopup(`
                 <div class="p-2">
-                    <h3 class="font-bold text-base text-blue-600 mb-1">📍 Tu ubicación</h3>
+                    <h3 class="font-bold text-base text-blue-600 mb-1">Tu ubicación</h3>
                     <p class="text-xs text-gray-600">Precisión: ±${Math.round(accuracy)}m</p>
                 </div>
             `);
 
-        // Centrar mapa en la ubicación del usuario
         map.setView(coords, 0.2, {
             animate: true,
             duration: 0.8
         });
     }
 
-    function showOutOfBoundsModal(lat, lng, accuracy) {
-    const distance = calculateDistanceFromCampus(lat, lng);
-    
-    alert(`⚠️ FUERA DEL CAMPUS\n\n` +
-          `Tu ubicación está a ~${distance}m del campus UCT.\n\n` +
-          `📍 Tu posición: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n` +
-          `🎯 Precisión: ±${Math.round(accuracy)}m\n\n` +
-          `La navegación solo funciona dentro del campus.`);
-    }
-
-    function calculateDistanceFromCampus(lat, lng) {
-        const centerLat = (campusBounds.north + campusBounds.south) / 2;
-        const centerLng = (campusBounds.west + campusBounds.east) / 2;
-
-        const R = 6371000; // Radio de la Tierra en metros
-        const dLat = (lat - centerLat) * Math.PI / 180;
-        const dLng = (lng - centerLng) * Math.PI / 180;
-
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(centerLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
-                  Math.sin(dLng/2) * Math.sin(dLng/2);
-
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return Math.round(R * c);
-    }
-
-    function resetLocationButton(btn, success = false) {
-    if (!btn) return;
-    
-    btn.disabled = false;
-    btn.innerHTML = success ? `
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
-        </svg>
-        Actualizar Ubicación
-    ` : `
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-        Mi Ubicación
-    `;
-}
-
-// ✅ FUNCIÓN MEJORADA: Manejo de errores
-function handleLocationError(error, locationBtn) {
-    let message = '❌ No se pudo obtener tu ubicación.\n\n';
-    
-    switch(error.code) {
-        case error.PERMISSION_DENIED:
-            message += '🚫 Permiso denegado.\n\n' +
-                      'Para usar la geolocalización:\n' +
-                      '1. Ve a la configuración de tu navegador\n' +
-                      '2. Permite el acceso a ubicación para este sitio\n' +
-                      '3. Recarga la página';
-            break;
-        case error.POSITION_UNAVAILABLE:
-            message += '📡 Ubicación no disponible.\n' +
-                      'Asegúrate de tener el GPS activado.';
-            break;
-        case error.TIMEOUT:
-            message += '⏱️ Tiempo de espera agotado.\n' +
-                      'Intenta de nuevo en un área con mejor señal.';
-            break;
-        default:
-            message += '⚠️ Error desconocido. Código: ' + error.code;
-    }
-
-    alert(message);
-    resetLocationButton(locationBtn);
-    }
-
-    // ✅ SOLICITUD AUTOMÁTICA AL CARGAR (opcional pero recomendado)
-    document.addEventListener('DOMContentLoaded', function() {
-        // Esperar 2 segundos después de cargar para no ser invasivo
-        setTimeout(() => {
-            if (navigator.geolocation && !userLocation) {
-                console.log('🔄 Solicitando ubicación automáticamente...');
-                getUserLocation();
-            }
-        }, 2000);
-    });
-
-
-    // Activar seguimiento continuo de ubicación
-    function startLocationTracking() {
-        if (!navigator.geolocation) return;
-
-        if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-        }
-
-        watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                const { latitude, longitude, accuracy } = position.coords;
-                const mapCoords = gpsToMapCoords(latitude, longitude);
-
-                if (mapCoords) {
-                    userLocation = mapCoords;
-                    showUserLocation(mapCoords, accuracy);
-                }
-            },
-            (error) => {
-                console.error('Error en seguimiento:', error);
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 1000
-            }
-        );
-    }
-
-    // Detener seguimiento de ubicación
-    function stopLocationTracking() {
-        if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-            watchId = null;
-        }
-    }
-
-    // Funciones auxiliares
     function isOpenNow(schedule) {
         if (!schedule) return true;
         const now = new Date();
@@ -699,9 +713,9 @@ function handleLocationError(error, locationBtn) {
     function getStatusBadge(schedule) {
         const isOpen = isOpenNow(schedule);
         if (isOpen) {
-            return '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">🟢 Abierto</span>';
+            return '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Abierto</span>';
         } else {
-            return '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">🔴 Cerrado</span>';
+            return '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Cerrado</span>';
         }
     }
 
@@ -718,8 +732,7 @@ function handleLocationError(error, locationBtn) {
     function calculateWalkTime(distanceMeters) {
         const walkingSpeedMPS = 1.4;
         const timeSeconds = distanceMeters / walkingSpeedMPS;
-        const minutes = Math.round(timeSeconds / 60);
-        return minutes;
+        return Math.round(timeSeconds / 60);
     }
 
     function findNearestNode(pos) {
@@ -739,14 +752,12 @@ function handleLocationError(error, locationBtn) {
     }
 
     function findShortestPath(startNode, endNode) {
-        // Validar que los nodos existen
         if (!pathNetwork.nodes[startNode] || !pathNetwork.nodes[endNode]) {
-            console.error('Nodos inválidos:', startNode, endNode);
             return null;
         }
 
         const openSet = [startNode];
-        const closedSet = new Set(); // Nodos ya procesados
+        const closedSet = new Set();
         const cameFrom = {};
         const gScore = { [startNode]: 0 };
         const fScore = { 
@@ -757,12 +768,11 @@ function handleLocationError(error, locationBtn) {
         };
 
         let iterations = 0;
-        const maxIterations = 1000; // Límite de seguridad
+        const maxIterations = 1000;
 
         while (openSet.length > 0 && iterations < maxIterations) {
             iterations++;
 
-            // Encontrar nodo con menor fScore en openSet
             let current = openSet[0];
             let currentIndex = 0;
             for (let i = 1; i < openSet.length; i++) {
@@ -772,34 +782,22 @@ function handleLocationError(error, locationBtn) {
                 }
             }
 
-            // Si llegamos al destino, reconstruir el camino
             if (current === endNode) {
                 const path = [current];
                 while (cameFrom[current]) {
                     current = cameFrom[current];
                     path.unshift(current);
                 }
-                console.log(`✅ Ruta encontrada en ${iterations} iteraciones:`, path);
                 return path;
             }
 
-            // Mover current de openSet a closedSet
             openSet.splice(currentIndex, 1);
             closedSet.add(current);
 
-            // Explorar vecinos
             const neighbors = pathNetwork.edges[current] || [];
             for (const neighbor of neighbors) {
-                // Saltar si ya fue procesado
-                if (closedSet.has(neighbor)) {
-                    continue;
-                }
-
-                // Verificar que el nodo vecino existe
-                if (!pathNetwork.nodes[neighbor]) {
-                    console.warn(`Nodo vecino ${neighbor} no existe en pathNetwork.nodes`);
-                    continue;
-                }
+                if (closedSet.has(neighbor)) continue;
+                if (!pathNetwork.nodes[neighbor]) continue;
 
                 const tentativeGScore = gScore[current] + 
                     calculateDistance(
@@ -807,7 +805,6 @@ function handleLocationError(error, locationBtn) {
                         pathNetwork.nodes[neighbor]
                     );
 
-                // Si encontramos un mejor camino a este vecino
                 if (tentativeGScore < (gScore[neighbor] || Infinity)) {
                     cameFrom[neighbor] = current;
                     gScore[neighbor] = tentativeGScore;
@@ -817,18 +814,11 @@ function handleLocationError(error, locationBtn) {
                             pathNetwork.nodes[endNode]
                         );
 
-                    // Agregar a openSet si no está
                     if (!openSet.includes(neighbor)) {
                         openSet.push(neighbor);
                     }
                 }
             }
-        }
-
-        if (iterations >= maxIterations) {
-            console.error('⚠️ A* alcanzó el límite de iteraciones');
-        } else {
-            console.warn('⚠️ No se encontró camino entre', startNode, 'y', endNode);
         }
 
         return null;
@@ -865,10 +855,15 @@ function handleLocationError(error, locationBtn) {
         });
         hiddenOriginalMarkers = [];
         
-        const routeInfo = document.getElementById('route-info');
-        const clearBtn = document.getElementById('clear-route');
-        if (routeInfo) routeInfo.classList.add('hidden');
-        if (clearBtn) clearBtn.classList.add('hidden');
+        document.querySelectorAll('[id^="route-info"]').forEach(el => el.classList.add('hidden'));
+
+        if (map) {
+        map.setView([height / 2, width / 2], -1, {
+            animate: true,
+            duration: 0.5
+        });
+    }
+
     }
 
     function drawRoute(fromPos, toPos, fromName, toName) {
@@ -876,9 +871,7 @@ function handleLocationError(error, locationBtn) {
         
         clearRoute();
 
-        console.log(`🗺️ Calculando ruta de "${fromName}" a "${toName}"`);
-
-        if (fromName && fromName !== "Entrada Principal") {
+        if (fromName && fromName !== "Entrada Principal" && fromName !== "Tu Ubicación") {
             const fromMarker = markersMap[fromName];
             if (fromMarker && map.hasLayer(fromMarker.marker)) {
                 map.removeLayer(fromMarker.marker);
@@ -894,43 +887,32 @@ function handleLocationError(error, locationBtn) {
             }
         }
 
-        // Encontrar nodos más cercanos
         const startNode = findNearestNode(fromPos);
         const endNode = findNearestNode(toPos);
 
-        console.log(`Nodo inicio: ${startNode}, Nodo destino: ${endNode}`);
-
         if (!startNode || !endNode) {
-            console.error('❌ No se pudieron encontrar nodos válidos');
-            alert('Error: No se pudo calcular la ruta. Intenta con otra ubicación.');
+            alert('Error: No se pudo calcular la ruta.');
             return;
         }
 
-        // Encontrar camino usando A*
         const nodePath = findShortestPath(startNode, endNode);
 
         let waypoints = [];
         
         if (nodePath && nodePath.length > 0) {
-            // Agregar posición inicial
             waypoints.push(fromPos);
             
-            // Agregar todos los nodos del camino
             for (const node of nodePath) {
                 if (pathNetwork.nodes[node]) {
                     waypoints.push(pathNetwork.nodes[node]);
                 }
             }
             
-            // Agregar posición final
             waypoints.push(toPos);
         } else {
-            // Fallback: línea directa si no hay camino
-            console.warn('⚠️ Usando línea directa (no se encontró camino en la red)');
             waypoints = [fromPos, toPos];
         }
 
-        // Crear línea de ruta
         routeLine = L.polyline(waypoints, {
             color: '#DC2626',
             weight: 7,
@@ -941,7 +923,6 @@ function handleLocationError(error, locationBtn) {
             lineJoin: 'round'
         }).addTo(map);
 
-        // Animar el dash
         if (routeAnimationInterval) {
             clearInterval(routeAnimationInterval);
         }
@@ -969,85 +950,33 @@ function handleLocationError(error, locationBtn) {
             iconAnchor: [15, 49]
         });
 
+
         const startMarker = L.marker(fromPos, { icon: startIcon }).addTo(map);
         const endMarker = L.marker(toPos, { icon: endIcon }).addTo(map);
 
         routeMarkers.push(startMarker, endMarker);
         map.fitBounds(waypoints, { padding: [80, 80] });
 
-        // Calcular y mostrar información
         const totalDistance = calculatePathDistance(waypoints);
         const distanceMeters = pixelsToMeters(totalDistance);
         const walkTime = calculateWalkTime(distanceMeters);
 
-        const distanceEl = document.getElementById('route-distance');
-        const timeEl = document.getElementById('route-time');
-        const infoEl = document.getElementById('route-info');
-        const clearBtn = document.getElementById('clear-route');
-        
-        if (distanceEl) distanceEl.textContent = `Distancia: ~${distanceMeters} metros`;
-        if (timeEl) timeEl.textContent = `Tiempo estimado: ~${walkTime} min caminando`;
-        if (infoEl) infoEl.classList.remove('hidden');
-        if (clearBtn) clearBtn.classList.remove('hidden');
-
-        console.log(`Ruta dibujada: ${distanceMeters}m, ${walkTime} min`);
-    }
-
-    function drawDebugNodes() {
-        pathNodes.forEach(node => {
-            if (map && map.hasLayer(node)) {
-                map.removeLayer(node);
-            }
+        document.querySelectorAll('[id^="route-distance"]').forEach(el => {
+            el.textContent = `Distancia: ~${distanceMeters} metros`;
         });
-        pathNodes = [];
-        
-        if (!map) return;
-        
-        for (const [nodeName, nodePos] of Object.entries(pathNetwork.nodes)) {
-            if (!nodePos || !nodePos[0]) continue;
-            
-            const debugIcon = L.divIcon({
-                html: `<div class="debug-node" title="${nodeName}">
-                    <span class="node-label">${nodeName}</span>
-                </div>`,
-                className: '',
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
-            });
-            
-            const debugMarker = L.marker(nodePos, { icon: debugIcon }).addTo(map);
-            pathNodes.push(debugMarker);
-            
-            debugMarker.on('click', function(e) {
-                if (e && e.originalEvent) {
-                    L.DomEvent.stopPropagation(e);
-                }
-                console.log(`%c🟢 Nodo: ${nodeName}`, 'color: #10B981; font-weight: bold; font-size: 14px');
-                console.log(`Posición: [height * ${(nodePos[0] / height).toFixed(3)}, width * ${(nodePos[1] / width).toFixed(3)}]`);
-                console.log(`Conexiones: ${pathNetwork.edges[nodeName]?.join(', ') || 'ninguna'}`);
-            });
-        }
-        
-        for (const [nodeName, connections] of Object.entries(pathNetwork.edges)) {
-            const nodePos = pathNetwork.nodes[nodeName];
-            if (!nodePos || !nodePos[0]) continue;
-            
-            connections.forEach(connectedNode => {
-                const connectedPos = pathNetwork.nodes[connectedNode];
-                if (connectedPos && connectedPos[0]) {
-                    const debugLine = L.polyline([nodePos, connectedPos], {
-                        color: '#10B981',
-                        weight: 2,
-                        opacity: 0.4,
-                        dashArray: '5, 5'
-                    }).addTo(map);
-                    pathNodes.push(debugLine);
-                }
-            });
+        document.querySelectorAll('[id^="route-time"]').forEach(el => {
+            el.textContent = `Tiempo estimado: ~${walkTime} min caminando`;
+        });
+        document.querySelectorAll('[id^="route-info"]').forEach(el => {
+            el.classList.remove('hidden');
+        });
+
+        const mobilePanel = document.getElementById('mobile-panel');
+        if (mobilePanel) {
+            setTimeout(() => mobilePanel.classList.remove('expanded'), 1000);
         }
     }
 
-    // Iconos personalizados
     const createMarkerWithSVG = (iconPath, color) => L.divIcon({
         html: `
             <svg width="35" height="45" viewBox="0 0 24 24">
@@ -1056,7 +985,7 @@ function handleLocationError(error, locationBtn) {
             </svg>
         `,
         className: '',
-        iconSize: [75, 90],
+        iconSize: [35, 45],
         iconAnchor: [17, 45],
         popupAnchor: [0, -45]
     });
@@ -1069,7 +998,7 @@ function handleLocationError(error, locationBtn) {
             </svg>
         `,
         className: '',
-        iconSize: [85, 100],
+        iconSize: [45, 55],
         iconAnchor: [22, 55],
         popupAnchor: [0, -55]
     });
@@ -1102,19 +1031,61 @@ function handleLocationError(error, locationBtn) {
         tesoreria: createHighlightedMarker('/markers/wallet.svg', '#22C55E')
     };
 
-    // Cargar imagen y inicializar mapa
     const img = new Image();
+
+    // Escuchar evento de búsqueda desde el Hero
+    window.addEventListener('searchLocation', (e) => {
+        const locationName = e.detail.name;
+
+        // Esperar un momento para asegurar que el mapa esté visible
+        setTimeout(() => {
+            focusOnMarker(locationName);
+        }, 300);
+    });
+
+    function focusOnMarker(markerName) {
+    const markerData = markersMap[markerName];
+    if (!markerData || !map) {
+        console.error('No se puede enfocar:', markerName, 'Map:', !!map, 'Data:', !!markerData);
+        return;
+    }
     
+    // Cerrar popups abiertos
+    map.closePopup();
+    
+    // AGREGAR ANIMACIÓN AL ÍCONO DEL MARCADOR
+    const markerElement = markerData.marker.getElement();
+    if (markerElement) {
+        markerElement.classList.add('marker-pop');
+        setTimeout(() => {
+            markerElement.classList.remove('marker-pop');
+        }, 300);
+    }
+    
+    // Hacer zoom y centrar en el marcador
+    map.flyTo(markerData.pos, 0.3, {
+        duration: 0.8,
+        easeLinearity: 0.5
+    });
+    
+    // Abrir popup después del zoom con un pequeño delay
+    setTimeout(() => {
+        markerData.marker.openPopup();
+        
+        // Cerrar panel móvil si está expandido
+        const mobilePanel = document.getElementById('mobile-panel');
+        if (mobilePanel && mobilePanel.classList.contains('expanded')) {
+            mobilePanel.classList.remove('expanded');
+        }
+    }, 900);
+}
+
     img.onload = function() {
         width = this.naturalWidth;
         height = this.naturalHeight;
-
-        console.log(`📐 Mapa cargado: ${width}x${height}px`);
         
         mainEntrance.pos = [height * 0.200, width * 0.210];
         pathNetwork.nodes['entrada'] = mainEntrance.pos;
-
-        // Inicializar posiciones de nodos
         pathNetwork.nodes['entrada2'] = [height * 0.298, width * 0.290];
         pathNetwork.nodes['oeste1'] = [height * 0.320, width * 0.121];
         pathNetwork.nodes['oeste2'] = [height * 0.434, width * 0.200];
@@ -1145,14 +1116,21 @@ function handleLocationError(error, locationBtn) {
         pathNetwork.nodes['auxiliar5'] = [height * 0.778, width * 0.662];
         pathNetwork.nodes['auxiliar6'] = [height * 0.424, width * 0.258];
 
-        // Verificar que el elemento del mapa existe
-        const mapElement = document.getElementById('enhanced-map');
+        const img = new Image();
+    
+
+        // DETECTAR SI ES MÓVIL O DESKTOP
+        const isMobile = window.innerWidth < 1024;
+        const mapElementId = isMobile ? 'enhanced-map-mobile' : 'enhanced-map';
+        const mapElement = document.getElementById(mapElementId);
+        
         if (!mapElement) {
-            console.error('❌ Elemento #enhanced-map no encontrado');
+            console.error(`Elemento #${mapElementId} no encontrado`);
             return;
         }
 
-        // Inicializar Leaflet
+        console.log(`Inicializando mapa en: ${mapElementId}`);
+
         delete L.Icon.Default.prototype._getIconUrl;
         L.Icon.Default.mergeOptions({
             iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -1160,7 +1138,7 @@ function handleLocationError(error, locationBtn) {
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png'
         });
         
-        map = L.map('enhanced-map', {
+        map = L.map(mapElementId, {
             crs: L.CRS.Simple,
             maxBoundsViscosity: 1.0,
             minZoom: -0.6,
@@ -1183,25 +1161,9 @@ function handleLocationError(error, locationBtn) {
         map.setMaxBounds(bounds);
         map.setView([height / 2, width / 2], -1);
 
-        // AHORA SÍ podemos añadir el event listener al mapa
-        map.on('click', function(e) {
-            if (!debugMode) return;
-            
-            const latlng = e.latlng;
-            const coords = `[height * ${(latlng.lat / height).toFixed(3)}, width * ${(latlng.lng / width).toFixed(3)}]`;
-            console.log(`%c📍 Coordenadas: ${coords}`, 'color: #3B82F6; font-weight: bold; font-size: 14px');
-            
-            navigator.clipboard.writeText(coords).then(() => {
-                console.log('✅ Coordenadas copiadas al portapapeles');
-            }).catch(() => {
-                console.log('❌ No se pudo copiar al portapapeles');
-            });
-        });
-
-        // Horarios
         const schedules = {
             weekdays: { 
-                0: { closed: true },
+                0: { closed: false },
                 1: { open: '08:00', close: '20:00' },
                 2: { open: '08:00', close: '20:00' },
                 3: { open: '08:00', close: '20:00' },
@@ -1220,12 +1182,12 @@ function handleLocationError(error, locationBtn) {
             },
             gym: {
                 0: { closed: true },
-                1: { open: '07:00', close: '21:00' },
+                1: { open: '09:00', close: '20:30' },
                 2: { open: '07:00', close: '21:00' },
                 3: { open: '07:00', close: '21:00' },
                 4: { open: '07:00', close: '21:00' },
                 5: { open: '07:00', close: '19:00' },
-                6: { open: '09:00', close: '14:00' }
+                6: { open: '09:00', close: '12:00' }
             },
             biblioteca: {
                 0: { closed: true },
@@ -1247,7 +1209,6 @@ function handleLocationError(error, locationBtn) {
             }
         };
 
-        // Marcadores predefinidos
         const predefinedMarkers = [
             { pos: [height * 0.277, width * 0.323], name: "Edificio 1", type: "edificio", description: "Edificio de informaciones y asistentes sociales", schedule: schedules.weekdays, contact: "Ext. 1101", services: ["WiFi", "Enchufes", "Accesibilidad"], capacity: "300 personas" },
             { pos: [height * 0.394, width * 0.407], name: "Edificio 2", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1102", services: ["WiFi", "Baños", "Sala de estar"], capacity: "400 personas" },
@@ -1269,13 +1230,15 @@ function handleLocationError(error, locationBtn) {
             { pos: [height * 0.757, width * 0.81], name: "Estacionamiento", type: "estacionamiento", description: "Zona de estacionamiento para todo público", schedule: null, contact: "Seguridad: Ext. 1700", services: ["Espacios cubiertos", "Vigilancia 24/7"], capacity: "150 vehículos" },
             { pos: [height * 0.8, width * 0.77], name: "Baños Públicos", type: "baños", description: "Baños para todo público", schedule: null, contact: "Mantenimiento: Ext. 1800", services: ["Accesibilidad", "Agua caliente"], capacity: "20 personas" },
             { pos: [height * 0.42, width * 0.181], name: "Estacionamiento de Bicicletas", type: "bicicletas", description: "Zona segura para estacionar bicicletas", schedule: null, contact: "Seguridad: Ext. 1700", services: ["Techado", "Vigilancia", "Bomba de aire"], capacity: "50 bicicletas" },
-            { pos: [height * 0.63, width * 0.395], name: "Gimnasio", type: "gym", description: "Gimnasio en edificio 15", schedule: schedules.gym, contact: "Ext. 1901 | gym@uct.cl", services: ["Máquinas", "Pesas libres", "Duchas", "Casilleros"], capacity: "60 personas" },
+            { pos: [height * 0.63, width * 0.395], name: "Gimnasio", type: "gym", description: "Gimnasio en edificio 15", schedule: schedules.gym, contact: "Sin contacto | gimnasio15@uct.cl", services: ["Máquinas", "Pesas libres", "Duchas", "Casilleros"], capacity: "60 personas" },
             { pos: [height * 0.56, width * 0.64], name: "Zona de Calistenia", type: "calistenia", description: "Área al aire libre para ejercicios", schedule: null, contact: "Sin contacto", services: ["Barras", "Paralelas", "Aire libre"], capacity: "30 personas" }
         ];
 
         const markersByType = {};
-        const routeFromSelect = document.getElementById('route-from');
-        const routeToSelect = document.getElementById('route-to');
+        const routeFromSelectMobile = document.getElementById('route-from-mobile');
+        const routeToSelectMobile = document.getElementById('route-to-mobile');
+        const routeFromSelectDesktop = document.getElementById('route-from-desktop');
+        const routeToSelectDesktop = document.getElementById('route-to-desktop');
 
         predefinedMarkers.forEach(marker => {
             const icon = customIcons[marker.type];
@@ -1285,81 +1248,99 @@ function handleLocationError(error, locationBtn) {
             const statusBadge = marker.schedule ? getStatusBadge(marker.schedule) : '';
             const todaySchedule = getTodaySchedule(marker.schedule);
             
-            const popupContent = `
-                <div class="p-2 min-w-[280px]">
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-bold text-lg text-gray-800">${marker.name}</h3>
-                        ${statusBadge}
-                    </div>
-                    <p class="text-sm text-gray-600 mb-3">${marker.description}</p>
-                    
-                    ${marker.schedule ? `
-                        <div class="mb-3 p-2 bg-gray-50 rounded-lg">
-                            <div class="flex items-center gap-2 text-sm">
-                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span class="font-medium text-gray-700">Hoy: ${todaySchedule}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="mb-3">
-                        <div class="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                            </svg>
-                            <span>${marker.contact}</span>
-                        </div>
-                        
-                        ${marker.capacity ? `
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                                <span>Capacidad: ${marker.capacity}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                    
-                    ${marker.services && marker.services.length > 0 ? `
-                        <div class="mb-3">
-                            <p class="text-xs font-semibold text-gray-700 mb-2">Servicios disponibles:</p>
-                            <div class="flex flex-wrap gap-1">
-                                ${marker.services.map(service => `
-                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 border border-blue-200">
-                                        ${service}
-                                    </span>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="flex gap-2 mt-3">
-                        <button class="route-to-here flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition font-medium flex items-center justify-center gap-1" data-name="${marker.name}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                            </svg>
-                            Cómo llegar
-                        </button>
-                        <button class="share-location flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-1" data-name="${marker.name}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
-                            </svg>
-                            Compartir
-                        </button>
+            const leafletMarker = L.marker(marker.pos, { icon })
+    .addTo(map);
+
+leafletMarker.on('click', function() {
+    const markerPos = this.getLatLng ? [this.getLatLng().lat, this.getLatLng().lng] : marker.pos;
+    
+    const distanceInfo = userLocation ? `
+        <div class="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-center gap-2 text-sm text-blue-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                </svg>
+                <span class="font-medium">~${Math.round(pixelsToMeters(calculateDistance(userLocation, markerPos)))}m desde tu ubicación</span>
+            </div>
+        </div>
+    ` : '';
+
+    const updatedPopupContent = `
+        <div class="p-2 min-w-[280px]">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-gray-800">${marker.name}</h3>
+                ${statusBadge}
+            </div>
+            <p class="text-sm text-gray-600 mb-3">${marker.description}</p>
+            
+            ${marker.schedule ? `
+                <div class="mb-3 p-2 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-2 text-sm">
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="font-medium text-gray-700">Hoy: ${todaySchedule}</span>
                     </div>
                 </div>
-            `;
+            ` : ''}
             
-            const leafletMarker = L.marker(marker.pos, { icon })
-                .addTo(map)
-                .bindPopup(popupContent, {
-                    autoPan: true,
-                    autoPanPadding: [10, 10],
-                    keepInView: true,
-                    maxWidth: 320
-                });
+            ${distanceInfo}
+            
+            <div class="mb-3">
+                <div class="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                    <span>${marker.contact}</span>
+                </div>
+                
+                ${marker.capacity ? `
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span>Capacidad: ${marker.capacity}</span>
+                    </div>
+                ` : ''}
+            </div>
+            
+            ${marker.services && marker.services.length > 0 ? `
+                <div class="mb-3">
+                    <p class="text-xs font-semibold text-gray-700 mb-2">Servicios disponibles:</p>
+                    <div class="flex flex-wrap gap-1">
+                        ${marker.services.map(service => `
+                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 border border-blue-200">
+                                ${service}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+            
+            <div class="flex gap-2 mt-3">
+                <button class="route-to-here flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition font-medium flex items-center justify-center gap-1" data-name="${marker.name}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                    Cómo llegar
+                </button>
+                <button class="share-location flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-1" data-name="${marker.name}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Compartir
+                </button>
+            </div>
+        </div>
+    `;
+
+    this.bindPopup(updatedPopupContent, {
+        autoPan: true,
+        autoPanPadding: [10, 10],
+        keepInView: true,
+        maxWidth: 320
+    }).openPopup();
+});
 
             if (!markersByType[marker.type]) {
                 markersByType[marker.type] = [];
@@ -1374,87 +1355,156 @@ function handleLocationError(error, locationBtn) {
                 isOpen: isOpen
             };
 
-            if (routeFromSelect) {
-                const option1 = document.createElement('option');
-                option1.value = marker.name;
-                option1.textContent = marker.name;
-                routeFromSelect.appendChild(option1);
-            }
+            
 
-            if (routeToSelect) {
-                const option2 = document.createElement('option');
-                option2.value = marker.name;
-                option2.textContent = marker.name;
-                routeToSelect.appendChild(option2);
-            }
+            [routeFromSelectMobile, routeFromSelectDesktop].forEach(select => {
+                if (select) {
+                    const option = document.createElement('option');
+                    option.value = marker.name;
+                    option.textContent = marker.name;
+                    select.appendChild(option);
+                }
+            });
+
+            [routeToSelectMobile, routeToSelectDesktop].forEach(select => {
+                if (select) {
+                    const option = document.createElement('option');
+                    option.value = marker.name;
+                    option.textContent = marker.name;
+                    select.appendChild(option);
+                }
+            });
         });
 
-        // Event listeners para botones en popups
-        map.on('popupopen', function(e) {
-            const popup = e.popup;
-            
-            const routeBtn = popup.getElement()?.querySelector('.route-to-here');
-            if (routeBtn) {
-                routeBtn.addEventListener('click', function() {
-                    const locationName = this.dataset.name;
-                    const routeTo = document.getElementById('route-to');
-                    const routeFrom = document.getElementById('route-from');
-                    if (routeTo) routeTo.value = locationName;
-                    if (routeFrom) routeFrom.value = '';
-                    popup.close();
-                    document.getElementById('route-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            }
+        // Funcionalidad de búsqueda
+            ['mobile', 'desktop'].forEach(device => {
+                const searchInput = document.getElementById(`search-input-${device}`);
+                const searchResults = document.getElementById(`search-results-${device}`);
+                const clearBtn = document.getElementById(`clear-search-${device}`);
 
-            const shareBtn = popup.getElement()?.querySelector('.share-location');
-            if (shareBtn) {
-                shareBtn.addEventListener('click', function() {
-                    const locationName = this.dataset.name;
-                    shareLocation(locationName);
+                if (!searchInput) return;
+
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase().trim();
+
+                    if (query.length === 0) {
+                        searchResults.classList.add('hidden');
+                        clearBtn.classList.add('hidden');
+                        return;
+                    }
+
+                    clearBtn.classList.remove('hidden');
+
+                    const matches = Object.entries(markersMap).filter(([name]) => 
+                        name.toLowerCase().includes(query)
+                    ).slice(0, 5);
+
+                    if (matches.length === 0) {
+                        searchResults.innerHTML = '<div class="p-3 text-sm text-gray-500">No se encontraron resultados</div>';
+                    } else {
+                        searchResults.innerHTML = matches.map(([name, data]) => `
+                            <button class="search-result-item w-full text-left px-3 py-2 hover:bg-blue-50 transition border-b border-gray-100 last:border-0" data-name="${name}">
+                                <div class="font-medium text-sm">${name}</div>
+                                <div class="text-xs text-gray-500">${data.data.description}</div>
+                            </button>
+                        `).join('');
+                        
+                        // Event listeners para los resultados
+                        searchResults.querySelectorAll('.search-result-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                const name = this.dataset.name;
+                                focusOnMarker(name);
+                                searchInput.value = '';
+                                searchResults.classList.add('hidden');
+                                clearBtn.classList.add('hidden');
+                            });
+                        });
+                    }
+
+                    searchResults.classList.remove('hidden');
                 });
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', () => {
+                        searchInput.value = '';
+                        searchResults.classList.add('hidden');
+                        clearBtn.classList.add('hidden');
+                    });
+                }
+            });
+
+        // Listener para búsqueda desde el hero.astro
+        window.addEventListener('searchLocation', (e) => {
+            const locationName = e.detail.name;
+            console.log('🔍 Búsqueda recibida en mapa:', locationName);
+            
+            // Verificar que el marcador existe
+            if (!markersMap[locationName]) {
+                console.error('Marcador no encontrado:', locationName);
+                return;
             }
+            
+            // Esperar un poco para asegurar que la vista esté activa
+            setTimeout(() => {
+                focusOnMarker(locationName);
+            }, 500);
         });
 
-        function shareLocation(locationName) {
-            const url = `${window.location.origin}${window.location.pathname}?location=${encodeURIComponent(locationName)}`;
-            const text = `📍 Ubicación en Campus UCT: ${locationName}\n${url}`;
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: `Campus UCT - ${locationName}`,
-                    text: text,
-                    url: url
-                }).catch(err => console.log('Error al compartir:', err));
-            } else {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('¡Enlace copiado al portapapeles!');
-                }).catch(err => {
-                    alert('No se pudo copiar el enlace');
-                });
-            }
+        // Usar delegación de eventos para los botones del popup
+map.on('click', function(e) {
+    // Solo procesar si es un popup
+    if (!e.originalEvent) return;
+    
+    const target = e.originalEvent.target;
+    
+    // Botón "Cómo llegar"
+    if (target.closest('.route-to-here')) {
+        const btn = target.closest('.route-to-here');
+        const locationName = btn.dataset.name;
+        
+        [routeToSelectMobile, routeToSelectDesktop].forEach(select => {
+            if (select) select.value = locationName;
+        });
+        
+        map.closePopup();
+        
+        const mobilePanel = document.getElementById('mobile-panel');
+        if (mobilePanel) {
+            mobilePanel.classList.add('expanded');
         }
+    }
+    
+    // Botón "Compartir"
+    if (target.closest('.share-location')) {
+        const btn = target.closest('.share-location');
+        const locationName = btn.dataset.name;
+        const url = `${window.location.origin}${window.location.pathname}?location=${encodeURIComponent(locationName)}`;
+        const text = `Ubicación en Campus UCT: ${locationName}\n${url}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: `Campus UCT - ${locationName}`,
+                text: text,
+                url: url
+            }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('¡Enlace copiado al portapapeles!');
+            }).catch(() => {
+                alert('No se pudo copiar el enlace');
+            });
+        }
+    }
+});
 
         function updateMarkers() {
-            const openNowFilter = document.getElementById('filter-open-now');
-            const openNowChecked = openNowFilter ? openNowFilter.checked : false;
-            
             document.querySelectorAll('.marker-filter').forEach(cb => {
                 const type = cb.dataset.type;
                 const show = cb.checked;
 
                 markersByType[type]?.forEach(marker => {
-                    const markerName = Object.keys(markersMap).find(
-                        key => markersMap[key].marker === marker
-                    );
-                    const markerData = markersMap[markerName];
-                    
-                    let shouldShow = show;
-                    if (openNowChecked && markerData) {
-                        shouldShow = shouldShow && markerData.isOpen;
-                    }
-                    
                     if (map) {
-                        if (shouldShow) {
+                        if (show) {
                             marker.addTo(map);
                         } else {
                             map.removeLayer(marker);
@@ -1464,71 +1514,31 @@ function handleLocationError(error, locationBtn) {
             });
         }
 
-        function highlightMarker(locationName) {
-            const markerData = markersMap[locationName];
-            if (!markerData || !map) return;
+        document.querySelectorAll('.marker-filter').forEach(cb => {
+            cb.addEventListener('change', updateMarkers);
+        });
 
-            if (currentHighlightedMarker) {
-                const prevMarker = currentHighlightedMarker.marker;
-                const prevType = currentHighlightedMarker.type;
-                prevMarker.setIcon(customIcons[prevType]);
-            }
+        // Event listeners para calcular ruta
+        const calculateBtns = [
+            { btn: document.getElementById('calculate-route-mobile'), from: routeFromSelectMobile, to: routeToSelectMobile },
+            { btn: document.getElementById('calculate-route-desktop'), from: routeFromSelectDesktop, to: routeToSelectDesktop }
+        ];
 
-            const typeCheckbox = document.querySelector(`.marker-filter[data-type="${markerData.type}"]`);
-            if (typeCheckbox && !typeCheckbox.checked) {
-                typeCheckbox.checked = true;
-                updateMarkers();
-            }
-
-            markerData.marker.setIcon(highlightedIcons[markerData.type]);
-            currentHighlightedMarker = markerData;
-
-            map.setView(markerData.pos, 0.2, {
-                animate: true,
-                duration: 0.8
-            });
-
-            setTimeout(() => {
-                markerData.marker.openPopup();
-            }, 900);
-
-            setTimeout(() => {
-                if (currentHighlightedMarker && currentHighlightedMarker.marker === markerData.marker) {
-                    markerData.marker.setIcon(customIcons[markerData.type]);
-                    currentHighlightedMarker = null;
-                }
-            }, 5000);
-        }
-
-        // Sistema de rutas - Event Listeners
-        const calculateBtn = document.getElementById('calculate-route');
-        const routeBtnText = document.getElementById('route-btn-text');
-        
-        if (calculateBtn) {
-            calculateBtn.addEventListener('click', () => {
-                const routeFrom = document.getElementById('route-from');
-                const routeTo = document.getElementById('route-to');
-                
-                const fromValue = routeFrom ? routeFrom.value : '';
-                const toValue = routeTo ? routeTo.value : '';
+        calculateBtns.forEach(({ btn, from, to }) => {
+            if (!btn) return;
+            
+            btn.addEventListener('click', () => {
+                const fromValue = from ? from.value : '';
+                const toValue = to ? to.value : '';
 
                 if (!toValue) {
-                    if (routeTo) {
-                        routeTo.style.borderColor = '#EF4444';
-                        setTimeout(() => {
-                            routeTo.style.borderColor = '';
-                        }, 2000);
-                    }
                     alert('Por favor selecciona un destino');
                     return;
                 }
 
-                // Verificar si se usa ubicación del usuario
-                if (fromValue === '__user_location__') {
-                    if (!userLocation) {
-                        alert('⚠️ Primero debes obtener tu ubicación usando el botón "Mi Ubicación"');
-                        return;
-                    }
+                if (fromValue === '__user_location__' && !userLocation) {
+                    alert('⚠️ Primero debes obtener tu ubicación');
+                    return;
                 }
 
                 if (fromValue && fromValue === toValue) {
@@ -1536,10 +1546,14 @@ function handleLocationError(error, locationBtn) {
                     return;
                 }
 
-                calculateBtn.disabled = true;
-                if (routeBtnText) routeBtnText.textContent = 'Calculando...';
+                btn.disabled = true;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `
+                    <svg class="w-5 h-5 animate-spin mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                `;
 
-                // Determinar posición de origen
                 let fromPos, fromName;
                 if (fromValue === '__user_location__') {
                     fromPos = userLocation;
@@ -1556,483 +1570,184 @@ function handleLocationError(error, locationBtn) {
 
                 setTimeout(() => {
                     drawRoute(fromPos, toPos, fromName, toValue);
-                    calculateBtn.disabled = false;
-                    if (routeBtnText) routeBtnText.textContent = 'Calcular Ruta';
+                    focusOnMarker(toValue);
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
                 }, 300);
             });
-        }
+        });
 
-        const clearBtn = document.getElementById('clear-route');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', () => {
+        // Event listeners para limpiar ruta
+        document.querySelectorAll('[id^="clear-route"]').forEach(btn => {
+            btn.addEventListener('click', () => {
                 clearRoute();
-                const routeFrom = document.getElementById('route-from');
-                const routeTo = document.getElementById('route-to');
-                if (routeFrom) routeFrom.value = '';
-                if (routeTo) routeTo.value = '';
+                [routeFromSelectMobile, routeFromSelectDesktop].forEach(select => {
+                    if (select) select.value = '';
+                });
+                [routeToSelectMobile, routeToSelectDesktop].forEach(select => {
+                    if (select) select.value = '';
+                });
                 
                 if (map) {
                     map.setView([height / 2, width / 2], -1);
                 }
             });
-        }
+        });
 
-        // Botón de obtener ubicación
-        const getLocationBtn = document.getElementById('get-location-btn');
-        if (getLocationBtn) {
-            getLocationBtn.addEventListener('click', getUserLocation);
-        }
+        // Botón de ubicación
+        const locationFab = document.getElementById('location-fab');
+        const locationBtnDesktop = document.getElementById('get-location-btn-desktop');
+        
+        [locationFab, locationBtnDesktop].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', getUserLocation);
+            }
+        });
 
-        // Botón de seguimiento continuo
-        const trackLocationBtn = document.getElementById('track-location-btn');
-        if (trackLocationBtn) {
-            let isTracking = false;
-            trackLocationBtn.addEventListener('click', function() {
-                isTracking = !isTracking;
-                
-                if (isTracking) {
-                    startLocationTracking();
-                    this.classList.remove('bg-gray-500');
-                    this.classList.add('bg-green-600');
-                    this.innerHTML = `
-                        <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
-                        </svg>
-                        Rastreando...
-                    `;
-                } else {
-                    stopLocationTracking();
-                    this.classList.remove('bg-green-600');
-                    this.classList.add('bg-gray-500');
-                    this.innerHTML = `
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                        </svg>
-                        Seguir
-                    `;
-                }
-            });
-        }
-
-        const swapBtn = document.getElementById('swap-route');
-        if (swapBtn) {
-            swapBtn.addEventListener('click', () => {
-                const routeFrom = document.getElementById('route-from');
-                const routeTo = document.getElementById('route-to');
-                
-                if (routeFrom && routeTo) {
-                    const from = routeFrom.value;
-                    const to = routeTo.value;
-                    routeFrom.value = to;
-                    routeTo.value = from;
-                    
-                    if (routeLine && to && calculateBtn) {
-                        setTimeout(() => {
-                            calculateBtn.click();
-                        }, 100);
+        // Controles de zoom
+        document.querySelectorAll('.zoom-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.dataset.action;
+                if (map) {
+                    if (action === 'in') {
+                        map.zoomIn();
+                    } else {
+                        map.zoomOut();
                     }
                 }
             });
-        }
-
-        const routeFromEl = document.getElementById('route-from');
-        const routeToEl = document.getElementById('route-to');
-        
-        if (routeFromEl) {
-            routeFromEl.addEventListener('change', () => {
-                if (routeLine) clearRoute();
-            });
-        }
-
-        if (routeToEl) {
-            routeToEl.addEventListener('change', () => {
-                if (routeLine) clearRoute();
-            });
-        }
-
-        window.addEventListener('searchLocation', (e) => {
-            highlightMarker(e.detail.name);
         });
 
-        document.querySelectorAll('.marker-filter').forEach(cb => {
-            cb.addEventListener('change', updateMarkers);
-        });
-
-        const openNowFilter = document.getElementById('filter-open-now');
-        if (openNowFilter) {
-            openNowFilter.addEventListener('change', updateMarkers);
-        }
-
-        const selectAllBtn = document.getElementById('select-all');
-        if (selectAllBtn) {
-            selectAllBtn.addEventListener('click', () => {
-                document.querySelectorAll('.marker-filter').forEach(cb => cb.checked = true);
-                updateMarkers();
-            });
-        }
+        // Panel móvil deslizable
+        const mobilePanel = document.getElementById('mobile-panel');
+        const panelHandle = mobilePanel?.querySelector('.mobile-panel-handle');
         
-        const deselectAllBtn = document.getElementById('deselect-all');
-        if (deselectAllBtn) {
-            deselectAllBtn.addEventListener('click', () => {
-                document.querySelectorAll('.marker-filter').forEach(cb => cb.checked = false);
-                updateMarkers();
-            });
-        }
+        if (mobilePanel && panelHandle) {
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
 
-        const zoomInBtn = document.getElementById('zoom-in');
-        if (zoomInBtn) {
-            zoomInBtn.addEventListener('click', () => {
-                if (map) map.zoomIn();
+            panelHandle.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                isDragging = true;
             });
-        }
 
-        const zoomOutBtn = document.getElementById('zoom-out');
-        if (zoomOutBtn) {
-            zoomOutBtn.addEventListener('click', () => {
-                if (map) map.zoomOut();
-            });
-        }
-
-        const debugBtn = document.getElementById('toggle-debug');
-        if (debugBtn) {
-            debugBtn.addEventListener('click', function() {
-                debugMode = !debugMode;
+            panelHandle.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const diff = currentY - startY;
                 
-                if (debugMode) {
-                    this.style.background = '#059669';
-                    this.textContent = '🛠️ Debug ON';
-                    drawDebugNodes();
-                    console.log('%c🛠️ MODO DEBUG ACTIVADO', 'color: #10B981; font-weight: bold; font-size: 16px');
-                    console.log('%c📍 Haz clic en el mapa para obtener coordenadas', 'color: #3B82F6; font-size: 14px');
-                    console.log('%c🟢 Haz clic en los nodos verdes para ver su información', 'color: #059669; font-size: 14px');
-                } else {
-                    this.style.background = '#16A34A';
-                    this.textContent = '🛠️ Debug';
-                    
-                    pathNodes.forEach(node => {
-                        if (map && map.hasLayer(node)) {
-                            map.removeLayer(node);
-                        }
-                    });
-                    pathNodes = [];
-                    
-                    console.log('%c🛠️ Modo debug desactivado', 'color: #6B7280; font-size: 14px');
+                if (diff > 0) {
+                    e.preventDefault();
                 }
             });
-        }
 
-        const closeInfoBtn = document.getElementById('close-info-panel');
-        if (closeInfoBtn) {
-            closeInfoBtn.addEventListener('click', () => {
-                const infoPanel = document.getElementById('info-panel');
-                if (infoPanel) infoPanel.classList.add('hidden');
+            panelHandle.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const diff = currentY - startY;
+                
+                if (diff > 100) {
+                    mobilePanel.classList.remove('expanded');
+                } else if (diff < -50) {
+                    mobilePanel.classList.add('expanded');
+                }
+                
+                currentY = 0;
+                startY = 0;
+            });
+
+            panelHandle.addEventListener('click', () => {
+                mobilePanel.classList.toggle('expanded');
             });
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const locationParam = urlParams.get('location');
-        if (locationParam) {
-            setTimeout(() => {
-                highlightMarker(locationParam);
-            }, 1000);
-        }
+        // Prevenir doble tap zoom en iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
 
-        console.log('✅ Mapa inicializado correctamente');
+        // Ajustar mapa en cambio de orientación
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                if (map) map.invalidateSize();
+            }, 300);
+        });
+
+        window.addEventListener('resize', function() {
+            if (map) {
+                setTimeout(() => map.invalidateSize(), 100);
+            }
+        });
     };
 
     img.onerror = function() {
-        console.error('❌ Error al cargar la imagen del mapa: /Map.png');
+        console.error('Error al cargar la imagen del mapa');
     };
 
     img.src = '/Map.png';
 
-    // Pantalla completa
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    if (fullscreenBtn) {
-        fullscreenBtn.addEventListener('click', function() {
-            const mapWrapper = document.getElementById('map-wrapper');
-            const exitBtn = document.getElementById('exit-fullscreen');
-            const mapDiv = document.getElementById('enhanced-map');
-            const customControls = document.querySelectorAll('#zoom-in, #zoom-out, #fullscreen-btn');
-            
-            if (mapWrapper && !document.fullscreenElement) {
-                mapWrapper.requestFullscreen().then(() => {
-                    if (mapDiv) {
-                        mapDiv.style.width = '100vw';
-                        mapDiv.style.height = '100vh';
-                    }
-                    customControls.forEach(btn => btn.style.display = 'none');
-                    setTimeout(() => {
-                        if (map) {
-                            map.invalidateSize();
-                            map.fitBounds(bounds);
-                        }
-                    }, 300);
-                    if (exitBtn) exitBtn.classList.remove('hidden');
-                });
-            }
-        });
-    }
 
-    const exitFullscreenBtn = document.getElementById('exit-fullscreen');
-    if (exitFullscreenBtn) {
-        exitFullscreenBtn.addEventListener('click', function() {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            }
-        });
-    }
-
-    document.addEventListener('fullscreenchange', function() {
-        const mapDiv = document.getElementById('enhanced-map');
-        const exitBtn = document.getElementById('exit-fullscreen');
-        const customControls = document.querySelectorAll('#zoom-in, #zoom-out, #fullscreen-btn');
+    document.addEventListener('click', (e) => {
+    ['mobile', 'desktop'].forEach(device => {
+        const searchInput = document.getElementById(`search-input-${device}`);
+        const searchResults = document.getElementById(`search-results-${device}`);
         
-        if (!document.fullscreenElement) {
-            if (mapDiv) {
-                mapDiv.style.width = '100%';
-                mapDiv.style.height = '600px';
-            }
-            customControls.forEach(btn => btn.style.display = 'flex');
-            if (exitBtn) exitBtn.classList.add('hidden');
-            setTimeout(() => {
-                if (map) {
-                    map.invalidateSize();
-                    map.fitBounds(bounds);
-                }
-            }, 300);
+        if (searchInput && searchResults && 
+            !searchInput.contains(e.target) && 
+            !searchResults.contains(e.target)) {
+            searchResults.classList.add('hidden');
         }
     });
+    });
 
-    window.addEventListener('resize', function() {
+    // Pantalla completa
+    function toggleFullscreen(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        if (!document.fullscreenElement) {
+            element.requestFullscreen().catch(err => {
+                console.error('Error al entrar en pantalla completa:', err);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    // Event listeners para botones de pantalla completa
+    document.getElementById('fullscreen-btn-desktop')?.addEventListener('click', () => {
+        toggleFullscreen('enhanced-map');
+    });
+
+    document.getElementById('fullscreen-btn-mobile')?.addEventListener('click', () => {
+        toggleFullscreen('map-container-mobile');
+    });
+
+    // Actualizar ícono cuando cambia el estado
+    document.addEventListener('fullscreenchange', () => {
+        const isFullscreen = !!document.fullscreenElement;
+        const iconPath = isFullscreen 
+            ? 'M9 9h6m0 0v6m0-6L9 15M15 15v-6m0 6H9m6 0l-6-6' // Salir
+            : 'M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4'; // Entrar
+
+        document.querySelectorAll('[id^="fullscreen-btn"] svg path').forEach(path => {
+            path.setAttribute('d', iconPath);
+        });
+    });
+
+    document.getElementById('recenter-btn-desktop')?.addEventListener('click', () => {
         if (map) {
-            setTimeout(() => map.invalidateSize(), 100);
+            map.flyTo([height / 2, width / 2], -0.7, {
+                duration: 0.8
+            });
         }
     });
 });
 </script>
-
-<style>
-    .custom-checkbox {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        user-select: none;
-        padding: 6px 8px;
-        border-radius: 8px;
-        transition: background-color 0.2s;
-    }
-
-    .custom-checkbox:hover {
-        background-color: #f3f4f6;
-    }
-
-    .custom-checkbox input {
-        position: absolute;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    .checkmark {
-        position: relative;
-        height: 20px;
-        width: 20px;
-        background-color: #fff;
-        border: 2px solid #d1d5db;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-        flex-shrink: 0;
-    }
-
-    .custom-checkbox:hover .checkmark {
-        border-color: #3b82f6;
-    }
-
-    .custom-checkbox input:checked ~ .checkmark {
-        background-color: #3b82f6;
-        border-color: #3b82f6;
-    }
-
-    .checkmark:after {
-        content: "";
-        position: absolute;
-        display: none;
-        left: 6px;
-        top: 2px;
-        width: 4px;
-        height: 9px;
-        border: solid white;
-        border-width: 0 2px 2px 0;
-        transform: rotate(45deg);
-    }
-
-    .custom-checkbox input:checked ~ .checkmark:after {
-        display: block;
-    }
-
-    .label-text {
-        margin-left: 10px;
-        color: #374151;
-        font-size: 14px;
-    }
-
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-        50% {
-            transform: scale(1.1);
-            opacity: 0.8;
-        }
-    }
-
-    .marker-pulse {
-        animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    /* Marcadores de ruta */
-    .route-marker {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 16px;
-        color: white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        border: 3px solid white;
-        animation: markerPop 0.3s ease-out;
-    }
-
-    @keyframes markerPop {
-        0% {
-            transform: scale(0);
-        }
-        50% {
-            transform: scale(1.2);
-        }
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    .route-start {
-        background: linear-gradient(135deg, #10B981, #059669);
-    }
-
-    .route-end {
-        background: linear-gradient(135deg, #EF4444, #DC2626);
-    }
-
-    /* Transiciones suaves para los selectores */
-    select {
-        transition: all 0.2s ease;
-    }
-
-    select:focus {
-        transform: scale(1.01);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    /* Mejorar el panel de ruta */
-    #route-panel {
-        transition: all 0.3s ease;
-    }
-
-    #route-info {
-        animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Nodos de debug para mapear rutas */
-    .debug-node {
-        width: 12px;
-        height: 12px;
-        background: #10B981;
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        cursor: pointer;
-        position: relative;
-    }
-
-    .debug-node:hover {
-        background: #059669;
-        transform: scale(1.5);
-        z-index: 1000;
-    }
-
-    .debug-node:hover .node-label {
-        display: block;
-    }
-
-    .node-label {
-        display: none;
-        position: absolute;
-        top: -25px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: white;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 10px;
-        font-weight: bold;
-        color: #059669;
-        white-space: nowrap;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        z-index: 1001;
-    }
-
-    .leaflet-control-attribution {
-        display: none !important;
-    }
-
-    .leaflet-popup-content-wrapper {
-        border-radius: 12px;
-    }
-
-    .leaflet-container {
-        background: transparent !important;
-    }
-
-    #enhanced-map {
-        background: transparent !important;
-    }
-
-    #map-wrapper {
-        background: transparent !important;
-    }
-
-    .leaflet-pane {
-        background: transparent !important;
-    }
-
-    #map-wrapper:fullscreen {
-        background: #000;
-    }
-
-    #map-wrapper:fullscreen #enhanced-map {
-        width: 100vw !important;
-        height: 100vh !important;
-        border-radius: 0;
-    }
-
-    @media (max-width: 768px) {
-        #enhanced-map {
-            height: 500px !important;
-        }
-    }
-</style>

@@ -1,16 +1,84 @@
 ---
-// Componente MapaInteractivo.astro
+// Componente Map2D.astro - Con Sistema de Rutas
 ---
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 
 <!-- Componente Mapa -->
-<div class="max-w-7xl mx-auto pt-44">
+<div class="max-w-[90rem] mx-auto pt-44">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Panel Lateral -->
         <div class="lg:col-span-1 space-y-4">
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <!-- Panel de Rutas -->
+            <div id="route-panel" class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg text-gray-800">¿Donde deseas ir?</h3>
+                    <button id="clear-route" class="text-gray-400 hover:text-red-600 transition hidden">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 mb-1 block">Desde:</label>
+                        <select id="route-from" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
+                            <option value="">Entrada Principal</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button id="swap-route" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 mb-1 block">Hasta:</label>
+                        <select id="route-to" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
+                            <option value="">Seleccionar destino</option>
+                        </select>
+                    </div>
+
+                    <button id="calculate-route" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <img class="w-6 h-6" src="markers/walk.svg" alt="">
+                        <span id="route-btn-text" class="">Iniciar</span>
+                    </button>
+
+                    <div id="route-info" class="hidden p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-blue-900 mb-1">Información de la ruta</p>
+                                <p id="route-distance" class="text-sm text-blue-800"></p>
+                                <p id="route-time" class="text-sm text-blue-800"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="bg-gray-50 rounded-xl shadow-sm p-6">
                 <h3 class="font-bold text-lg mb-4 text-gray-800">Filtros</h3>
+                
+                <div class="pb-3">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="filter-open-now" class="special-filter">
+                        <span class="checkmark"></span>
+                        <span class="label-text font-semibold">Abierto Ahora</span>
+                    </label>
+                </div>
+
+                <div>
+                    <hr class="border-solid border-gray-400/90 mb-4">
+                </div>
+
                 <div class="space-y-2">
                     <label class="custom-checkbox">
                         <input type="checkbox" class="marker-filter" data-type="edificio" checked>
@@ -78,12 +146,28 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Panel de Información -->
+            <div id="info-panel" class="bg-white rounded-xl shadow-sm p-6 hidden">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold text-lg text-gray-800">Información</h3>
+                    <button id="close-info-panel" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="info-content"></div>
+            </div>
         </div>
 
         <!-- Mapa Principal -->
         <div class="lg:col-span-3">
             <div id="map-wrapper" class="rounded-xl shadow-lg overflow-visible relative">
                 <div class="absolute top-4 right-4 flex gap-2 z-[500]" style="transform: translateX(-8px);">
+                    <button id="toggle-debug" class="bg-green-600 text-white px-3 py-2 rounded-lg shadow hover:shadow-md transition text-sm font-medium">
+                        🛠️ Debug
+                    </button>
                     <button id="zoom-in" class="bg-white p-2 rounded-lg shadow hover:shadow-md transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -122,16 +206,670 @@ document.addEventListener('DOMContentLoaded', function() {
     let bounds;
     let width = 0;
     let height = 0;
+    let markersMap = {};
+    let currentHighlightedMarker = null;
+    let routeLine = null;
+    let routeMarkers = [];
+    let routeAnimationInterval = null;
+    let hiddenOriginalMarkers = [];
+    let pathNodes = [];
+    let debugMode = false;
+    let userLocationMarker = null; // Marcador de ubicación del usuario
+    let userLocation = null; // Coordenadas del usuario en el mapa
+    let watchId = null; // ID para seguimiento de ubicación
 
-    // Configurar iconos por defecto
-    delete L.Icon.Default.prototype._getIconUrl;
-    L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png'
-    });
+    // Coordenadas reales del campus UCT Temuco
+    const campusBounds = {
+        // Coordenadas GPS reales de las esquinas del campus
+        topLeft: { lat: -38.73700459666474, lng: -72.60205038945038 },
+        bottomRight: { lat: -38.73860301490445, lng: -72.60146566790254 }
+    };
 
-    // Crear iconos personalizados
+    // Red de caminos del campus
+    const pathNetwork = {
+        nodes: {
+            'entrada': null,
+            'entrada2': [0, 0],
+            'oeste1': [0, 0],
+            'oeste2': [0, 0],
+            'oeste3': [0, 0],
+            'oeste4': [0, 0],
+            'oeste5': [0, 0],
+            'oeste6': [0, 0],
+            'oeste7': [0, 0],
+            'oeste8': [0, 0],
+            'oeste9': [0, 0],
+            'este1': [0, 0],
+            'este2': [0, 0],
+            'este3': [0, 0],
+            'este4': [0, 0],
+            'este5': [0, 0],
+            'este6': [0, 0],
+            'este7': [0, 0],
+            'auxiliar1': [0, 0],
+            'auxiliar2': [0, 0],
+            'auxiliar3': [0, 0],
+            'auxiliar4': [0, 0],
+            'auxiliar5': [0, 0],
+            'auxiliar6': [0, 0],
+            'central1': [0, 0],
+            'central2': [0, 0],
+            'central3': [0, 0],
+            'central4': [0, 0],
+            'norte1': [0, 0],
+            'norte2': [0, 0],
+        },
+        edges: {
+            'entrada': ['central1', 'oeste1', 'entrada2'],
+            'entrada2': ['entrada', 'central1'],
+            'oeste1': ['entrada', 'oeste2', 'auxiliar6'],
+            'oeste2': ['oeste3', 'oeste1', 'auxiliar6'],
+            'oeste3': ['oeste2', 'oeste4'],
+            'oeste4': ['oeste3', 'central1'],
+            'oeste5': ['oeste4', 'central3', 'oeste9'],
+            'oeste6': ['oeste5', 'central4', 'oeste7', 'oeste8'],
+            'oeste9': ['oeste4', 'oeste5', 'central2'],
+            'central1': ['oeste4', 'central2', 'entrada', 'entrada2'],
+            'central2': ['central1', 'central3', 'oeste9', 'auxiliar1', 'auxiliar2'],
+            'central3': ['central2', 'central4', 'este2', 'oeste5', 'auxiliar2'],
+            'central4': ['central3', 'norte1', 'oeste6', 'este5', 'auxiliar5'],
+            'este1': ['este2', 'auxiliar1'],
+            'este2': ['central3', 'este1', 'este3'],
+            'este3': ['este2', 'este4', 'este6', 'auxiliar3'],
+            'este4': ['este3', 'este5', 'auxiliar3', 'auxiliar4'],
+            'este5': ['este4', 'central4', 'auxiliar4'],
+            'este6': ['este3', 'este7'],
+            'este7': ['este6'],
+            'norte1': ['central4', 'norte2', 'auxiliar5'],
+            'norte2': ['norte1'],
+            'auxiliar1': ['central2', 'este1'],
+            'auxiliar2': ['central2', 'central3'],
+            'auxiliar3': ['este3', 'este4'],
+            'auxiliar4': ['este5', 'este4'],
+            'auxiliar5': ['norte1', 'central4'],
+            'auxiliar6': ['oeste3', 'oeste1'],
+        }
+    };
+
+    const mainEntrance = { name: "Entrada Principal", pos: null };
+
+    // Convertir coordenadas GPS a coordenadas del mapa
+    function gpsToMapCoords(lat, lng) {
+        if (!campusBounds || !width || !height) return null;
+
+        // Verificar si está dentro del campus
+        if (lat > campusBounds.topLeft.lat || lat < campusBounds.bottomRight.lat ||
+            lng < campusBounds.topLeft.lng || lng > campusBounds.bottomRight.lng) {
+            return null; // Fuera del rango
+        }
+
+        // Calcular posición relativa (0 a 1)
+        const latRange = campusBounds.topLeft.lat - campusBounds.bottomRight.lat;
+        const lngRange = campusBounds.bottomRight.lng - campusBounds.topLeft.lng;
+        
+        const relY = (campusBounds.topLeft.lat - lat) / latRange;
+        const relX = (lng - campusBounds.topLeft.lng) / lngRange;
+
+        // Convertir a coordenadas del mapa
+        return [relY * height, relX * width];
+    }
+
+    // Obtener ubicación del usuario
+    function getUserLocation() {
+        if (!navigator.geolocation) {
+            alert('Tu navegador no soporta geolocalización');
+            return;
+        }
+
+        const locationBtn = document.getElementById('get-location-btn');
+        if (locationBtn) {
+            locationBtn.disabled = true;
+            locationBtn.innerHTML = `
+                <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Ubicando...
+            `;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude, accuracy } = position.coords;
+                console.log(`📍 Ubicación obtenida: ${latitude}, ${longitude} (±${accuracy}m)`);
+
+                const mapCoords = gpsToMapCoords(latitude, longitude);
+
+                if (!mapCoords) {
+                    alert('⚠️ Estás fuera del campus. La geolocalización solo funciona dentro del campus UCT.');
+                    if (locationBtn) {
+                        locationBtn.disabled = false;
+                        locationBtn.innerHTML = `
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Mi Ubicación
+                        `;
+                    }
+                    return;
+                }
+
+                userLocation = mapCoords;
+                showUserLocation(mapCoords, accuracy);
+
+                // Actualizar selector de ruta
+                const routeFrom = document.getElementById('route-from');
+                if (routeFrom) {
+                    let option = routeFrom.querySelector('option[value="__user_location__"]');
+                    if (!option) {
+                        option = document.createElement('option');
+                        option.value = '__user_location__';
+                        routeFrom.insertBefore(option, routeFrom.firstChild);
+                    }
+                    option.textContent = '📍 Mi Ubicación';
+                    routeFrom.value = '__user_location__';
+                }
+
+                if (locationBtn) {
+                    locationBtn.disabled = false;
+                    locationBtn.innerHTML = `
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+                        </svg>
+                        Actualizar Ubicación
+                    `;
+                }
+
+                console.log('✅ Ubicación en el mapa:', mapCoords);
+            },
+            (error) => {
+                console.error('Error de geolocalización:', error);
+                let message = 'No se pudo obtener tu ubicación. ';
+                
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message += 'Debes permitir el acceso a tu ubicación.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message += 'Ubicación no disponible.';
+                        break;
+                    case error.TIMEOUT:
+                        message += 'Tiempo de espera agotado.';
+                        break;
+                }
+                
+                alert(message);
+                
+                if (locationBtn) {
+                    locationBtn.disabled = false;
+                    locationBtn.innerHTML = `
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Mi Ubicación
+                    `;
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    // Mostrar ubicación del usuario en el mapa
+    function showUserLocation(coords, accuracy) {
+        if (!map) return;
+
+        // Remover marcador anterior
+        if (userLocationMarker) {
+            map.removeLayer(userLocationMarker);
+        }
+
+        // Crear icono personalizado para ubicación del usuario
+        const userIcon = L.divIcon({
+            html: `
+                <div class="user-location-marker">
+                    <div class="user-location-dot"></div>
+                    <div class="user-location-pulse"></div>
+                </div>
+            `,
+            className: '',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+
+        userLocationMarker = L.marker(coords, { icon: userIcon })
+            .addTo(map)
+            .bindPopup(`
+                <div class="p-2">
+                    <h3 class="font-bold text-base text-blue-600 mb-1">📍 Tu ubicación</h3>
+                    <p class="text-xs text-gray-600">Precisión: ±${Math.round(accuracy)}m</p>
+                </div>
+            `);
+
+        // Centrar mapa en la ubicación del usuario
+        map.setView(coords, 0.2, {
+            animate: true,
+            duration: 0.8
+        });
+    }
+
+    // Activar seguimiento continuo de ubicación
+    function startLocationTracking() {
+        if (!navigator.geolocation) return;
+
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+        }
+
+        watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                const { latitude, longitude, accuracy } = position.coords;
+                const mapCoords = gpsToMapCoords(latitude, longitude);
+
+                if (mapCoords) {
+                    userLocation = mapCoords;
+                    showUserLocation(mapCoords, accuracy);
+                }
+            },
+            (error) => {
+                console.error('Error en seguimiento:', error);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 1000
+            }
+        );
+    }
+
+    // Detener seguimiento de ubicación
+    function stopLocationTracking() {
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+    }
+
+    // Funciones auxiliares
+    function isOpenNow(schedule) {
+        if (!schedule) return true;
+        const now = new Date();
+        const day = now.getDay();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        const todaySchedule = schedule[day];
+        if (!todaySchedule || todaySchedule.closed) return false;
+        const [openHour, openMin] = todaySchedule.open.split(':').map(Number);
+        const [closeHour, closeMin] = todaySchedule.close.split(':').map(Number);
+        const openTime = openHour * 60 + openMin;
+        const closeTime = closeHour * 60 + closeMin;
+        return currentTime >= openTime && currentTime <= closeTime;
+    }
+
+    function getTodaySchedule(schedule) {
+        if (!schedule) return 'Horario no disponible';
+        const now = new Date();
+        const day = now.getDay();
+        const todaySchedule = schedule[day];
+        if (!todaySchedule || todaySchedule.closed) return 'Cerrado hoy';
+        return `${todaySchedule.open} - ${todaySchedule.close}`;
+    }
+
+    function getStatusBadge(schedule) {
+        const isOpen = isOpenNow(schedule);
+        if (isOpen) {
+            return '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">🟢 Abierto</span>';
+        } else {
+            return '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">🔴 Cerrado</span>';
+        }
+    }
+
+    function calculateDistance(pos1, pos2) {
+        const dx = pos2[0] - pos1[0];
+        const dy = pos2[1] - pos1[1];
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function pixelsToMeters(pixels) {
+        return Math.round(pixels * 0.5);
+    }
+
+    function calculateWalkTime(distanceMeters) {
+        const walkingSpeedMPS = 1.4;
+        const timeSeconds = distanceMeters / walkingSpeedMPS;
+        const minutes = Math.round(timeSeconds / 60);
+        return minutes;
+    }
+
+    function findNearestNode(pos) {
+        let nearestNode = null;
+        let minDistance = Infinity;
+        
+        for (const [nodeName, nodePos] of Object.entries(pathNetwork.nodes)) {
+            if (!nodePos || !nodePos[0]) continue;
+            const dist = calculateDistance(pos, nodePos);
+            if (dist < minDistance) {
+                minDistance = dist;
+                nearestNode = nodeName;
+            }
+        }
+        
+        return nearestNode;
+    }
+
+    function findShortestPath(startNode, endNode) {
+        // Validar que los nodos existen
+        if (!pathNetwork.nodes[startNode] || !pathNetwork.nodes[endNode]) {
+            console.error('Nodos inválidos:', startNode, endNode);
+            return null;
+        }
+
+        const openSet = [startNode];
+        const closedSet = new Set(); // Nodos ya procesados
+        const cameFrom = {};
+        const gScore = { [startNode]: 0 };
+        const fScore = { 
+            [startNode]: calculateDistance(
+                pathNetwork.nodes[startNode], 
+                pathNetwork.nodes[endNode]
+            ) 
+        };
+
+        let iterations = 0;
+        const maxIterations = 1000; // Límite de seguridad
+
+        while (openSet.length > 0 && iterations < maxIterations) {
+            iterations++;
+
+            // Encontrar nodo con menor fScore en openSet
+            let current = openSet[0];
+            let currentIndex = 0;
+            for (let i = 1; i < openSet.length; i++) {
+                if ((fScore[openSet[i]] || Infinity) < (fScore[current] || Infinity)) {
+                    current = openSet[i];
+                    currentIndex = i;
+                }
+            }
+
+            // Si llegamos al destino, reconstruir el camino
+            if (current === endNode) {
+                const path = [current];
+                while (cameFrom[current]) {
+                    current = cameFrom[current];
+                    path.unshift(current);
+                }
+                console.log(`✅ Ruta encontrada en ${iterations} iteraciones:`, path);
+                return path;
+            }
+
+            // Mover current de openSet a closedSet
+            openSet.splice(currentIndex, 1);
+            closedSet.add(current);
+
+            // Explorar vecinos
+            const neighbors = pathNetwork.edges[current] || [];
+            for (const neighbor of neighbors) {
+                // Saltar si ya fue procesado
+                if (closedSet.has(neighbor)) {
+                    continue;
+                }
+
+                // Verificar que el nodo vecino existe
+                if (!pathNetwork.nodes[neighbor]) {
+                    console.warn(`Nodo vecino ${neighbor} no existe en pathNetwork.nodes`);
+                    continue;
+                }
+
+                const tentativeGScore = gScore[current] + 
+                    calculateDistance(
+                        pathNetwork.nodes[current], 
+                        pathNetwork.nodes[neighbor]
+                    );
+
+                // Si encontramos un mejor camino a este vecino
+                if (tentativeGScore < (gScore[neighbor] || Infinity)) {
+                    cameFrom[neighbor] = current;
+                    gScore[neighbor] = tentativeGScore;
+                    fScore[neighbor] = gScore[neighbor] + 
+                        calculateDistance(
+                            pathNetwork.nodes[neighbor], 
+                            pathNetwork.nodes[endNode]
+                        );
+
+                    // Agregar a openSet si no está
+                    if (!openSet.includes(neighbor)) {
+                        openSet.push(neighbor);
+                    }
+                }
+            }
+        }
+
+        if (iterations >= maxIterations) {
+            console.error('⚠️ A* alcanzó el límite de iteraciones');
+        } else {
+            console.warn('⚠️ No se encontró camino entre', startNode, 'y', endNode);
+        }
+
+        return null;
+    }
+
+    function calculatePathDistance(waypoints) {
+        let totalDistance = 0;
+        for (let i = 0; i < waypoints.length - 1; i++) {
+            totalDistance += calculateDistance(waypoints[i], waypoints[i + 1]);
+        }
+        return totalDistance;
+    }
+
+    function clearRoute() {
+        if (routeAnimationInterval) {
+            clearInterval(routeAnimationInterval);
+            routeAnimationInterval = null;
+        }
+        
+        if (routeLine && map) {
+            map.removeLayer(routeLine);
+            routeLine = null;
+        }
+        
+        if (map) {
+            routeMarkers.forEach(marker => map.removeLayer(marker));
+        }
+        routeMarkers = [];
+        
+        hiddenOriginalMarkers.forEach(markerData => {
+            if (map && markerData.marker) {
+                markerData.marker.addTo(map);
+            }
+        });
+        hiddenOriginalMarkers = [];
+        
+        const routeInfo = document.getElementById('route-info');
+        const clearBtn = document.getElementById('clear-route');
+        if (routeInfo) routeInfo.classList.add('hidden');
+        if (clearBtn) clearBtn.classList.add('hidden');
+    }
+
+    function drawRoute(fromPos, toPos, fromName, toName) {
+        if (!map) return;
+        
+        clearRoute();
+
+        console.log(`🗺️ Calculando ruta de "${fromName}" a "${toName}"`);
+
+        if (fromName && fromName !== "Entrada Principal") {
+            const fromMarker = markersMap[fromName];
+            if (fromMarker && map.hasLayer(fromMarker.marker)) {
+                map.removeLayer(fromMarker.marker);
+                hiddenOriginalMarkers.push(fromMarker);
+            }
+        }
+        
+        if (toName) {
+            const toMarker = markersMap[toName];
+            if (toMarker && map.hasLayer(toMarker.marker)) {
+                map.removeLayer(toMarker.marker);
+                hiddenOriginalMarkers.push(toMarker);
+            }
+        }
+
+        // Encontrar nodos más cercanos
+        const startNode = findNearestNode(fromPos);
+        const endNode = findNearestNode(toPos);
+
+        console.log(`Nodo inicio: ${startNode}, Nodo destino: ${endNode}`);
+
+        if (!startNode || !endNode) {
+            console.error('❌ No se pudieron encontrar nodos válidos');
+            alert('Error: No se pudo calcular la ruta. Intenta con otra ubicación.');
+            return;
+        }
+
+        // Encontrar camino usando A*
+        const nodePath = findShortestPath(startNode, endNode);
+
+        let waypoints = [];
+        
+        if (nodePath && nodePath.length > 0) {
+            // Agregar posición inicial
+            waypoints.push(fromPos);
+            
+            // Agregar todos los nodos del camino
+            for (const node of nodePath) {
+                if (pathNetwork.nodes[node]) {
+                    waypoints.push(pathNetwork.nodes[node]);
+                }
+            }
+            
+            // Agregar posición final
+            waypoints.push(toPos);
+        } else {
+            // Fallback: línea directa si no hay camino
+            console.warn('⚠️ Usando línea directa (no se encontró camino en la red)');
+            waypoints = [fromPos, toPos];
+        }
+
+        // Crear línea de ruta
+        routeLine = L.polyline(waypoints, {
+            color: '#DC2626',
+            weight: 7,
+            opacity: 0.85,
+            dashArray: '12, 8',
+            dashOffset: '0',
+            lineCap: 'round',
+            lineJoin: 'round'
+        }).addTo(map);
+
+        // Animar el dash
+        if (routeAnimationInterval) {
+            clearInterval(routeAnimationInterval);
+        }
+        
+        let offset = 0;
+        routeAnimationInterval = setInterval(() => {
+            offset += 1;
+            if (routeLine) {
+                routeLine.setStyle({ dashOffset: offset });
+            }
+        }, 50);
+
+        // Marcadores de inicio y fin
+        const startIcon = L.divIcon({
+            html: '<div class="route-marker route-start"> <img class="w-12 h-12" src="/markers/destination.svg" alt=""> </div>',
+            className: '',
+            iconSize: [25, 25],
+            iconAnchor: [20, 35]
+        });
+
+        const endIcon = L.divIcon({
+            html: '<div class="route-marker route-end text-blue-500"> <img class="w-12 h-12" src="/markers/map-pin.svg" alt="">  </div>',
+            className: '',
+            iconSize: [25, 25],
+            iconAnchor: [15, 49]
+        });
+
+        const startMarker = L.marker(fromPos, { icon: startIcon }).addTo(map);
+        const endMarker = L.marker(toPos, { icon: endIcon }).addTo(map);
+
+        routeMarkers.push(startMarker, endMarker);
+        map.fitBounds(waypoints, { padding: [80, 80] });
+
+        // Calcular y mostrar información
+        const totalDistance = calculatePathDistance(waypoints);
+        const distanceMeters = pixelsToMeters(totalDistance);
+        const walkTime = calculateWalkTime(distanceMeters);
+
+        const distanceEl = document.getElementById('route-distance');
+        const timeEl = document.getElementById('route-time');
+        const infoEl = document.getElementById('route-info');
+        const clearBtn = document.getElementById('clear-route');
+        
+        if (distanceEl) distanceEl.textContent = `Distancia: ~${distanceMeters} metros`;
+        if (timeEl) timeEl.textContent = `Tiempo estimado: ~${walkTime} min caminando`;
+        if (infoEl) infoEl.classList.remove('hidden');
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        console.log(`Ruta dibujada: ${distanceMeters}m, ${walkTime} min`);
+    }
+
+    function drawDebugNodes() {
+        pathNodes.forEach(node => {
+            if (map && map.hasLayer(node)) {
+                map.removeLayer(node);
+            }
+        });
+        pathNodes = [];
+        
+        if (!map) return;
+        
+        for (const [nodeName, nodePos] of Object.entries(pathNetwork.nodes)) {
+            if (!nodePos || !nodePos[0]) continue;
+            
+            const debugIcon = L.divIcon({
+                html: `<div class="debug-node" title="${nodeName}">
+                    <span class="node-label">${nodeName}</span>
+                </div>`,
+                className: '',
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            });
+            
+            const debugMarker = L.marker(nodePos, { icon: debugIcon }).addTo(map);
+            pathNodes.push(debugMarker);
+            
+            debugMarker.on('click', function(e) {
+                if (e && e.originalEvent) {
+                    L.DomEvent.stopPropagation(e);
+                }
+                console.log(`%c🟢 Nodo: ${nodeName}`, 'color: #10B981; font-weight: bold; font-size: 14px');
+                console.log(`Posición: [height * ${(nodePos[0] / height).toFixed(3)}, width * ${(nodePos[1] / width).toFixed(3)}]`);
+                console.log(`Conexiones: ${pathNetwork.edges[nodeName]?.join(', ') || 'ninguna'}`);
+            });
+        }
+        
+        for (const [nodeName, connections] of Object.entries(pathNetwork.edges)) {
+            const nodePos = pathNetwork.nodes[nodeName];
+            if (!nodePos || !nodePos[0]) continue;
+            
+            connections.forEach(connectedNode => {
+                const connectedPos = pathNetwork.nodes[connectedNode];
+                if (connectedPos && connectedPos[0]) {
+                    const debugLine = L.polyline([nodePos, connectedPos], {
+                        color: '#10B981',
+                        weight: 2,
+                        opacity: 0.4,
+                        dashArray: '5, 5'
+                    }).addTo(map);
+                    pathNodes.push(debugLine);
+                }
+            });
+        }
+    }
+
+    // Iconos personalizados
     const createMarkerWithSVG = (iconPath, color) => L.divIcon({
         html: `
             <svg width="35" height="45" viewBox="0 0 24 24">
@@ -145,10 +883,22 @@ document.addEventListener('DOMContentLoaded', function() {
         popupAnchor: [0, -45]
     });
 
+    const createHighlightedMarker = (iconPath, color) => L.divIcon({
+        html: `
+            <svg width="45" height="55" viewBox="0 0 24 24" class="marker-pulse">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="${color}"/>
+                <image href="${iconPath}" x="7" y="5" height="10" width="10"/>
+            </svg>
+        `,
+        className: '',
+        iconSize: [85, 100],
+        iconAnchor: [22, 55],
+        popupAnchor: [0, -55]
+    });
+
     const customIcons = {
         edificio: createMarkerWithSVG('../markers/building.svg', '#3B82F6'),
         libreria: createMarkerWithSVG('/markers/library.svg', '#10B981'),
-        laboratorio: createMarkerWithSVG('/markers/lab.svg', '#F59E0B'),
         comer: createMarkerWithSVG('/markers/utensils.svg', '#EF4444'),
         estacionamiento: createMarkerWithSVG('/markers/parking.svg', '#6366F1'),
         baños: createMarkerWithSVG('/markers/toilet.svg', '#6B7280'),
@@ -160,17 +910,80 @@ document.addEventListener('DOMContentLoaded', function() {
         tesoreria: createMarkerWithSVG('/markers/wallet.svg', '#22C55E')
     };
 
-    // Crear imagen para obtener dimensiones
+    const highlightedIcons = {
+        edificio: createHighlightedMarker('../markers/building.svg', '#3B82F6'),
+        libreria: createHighlightedMarker('/markers/library.svg', '#10B981'),
+        comer: createHighlightedMarker('/markers/utensils.svg', '#EF4444'),
+        estacionamiento: createHighlightedMarker('/markers/parking.svg', '#6366F1'),
+        baños: createHighlightedMarker('/markers/toilet.svg', '#6B7280'),
+        bicicletas: createHighlightedMarker('/markers/bike.svg', '#F97316'),
+        gym: createHighlightedMarker('/markers/dumbbell.svg', '#8B5CF6'),
+        calistenia: createHighlightedMarker('/markers/biceps-flexed.svg', '#EC4899'),
+        impresion: createHighlightedMarker('/markers/printer.svg', '#14B8A6'),
+        daas: createHighlightedMarker('/markers/notebook-pen.svg', '#F43F5E'),
+        tesoreria: createHighlightedMarker('/markers/wallet.svg', '#22C55E')
+    };
+
+    // Cargar imagen y inicializar mapa
     const img = new Image();
     
     img.onload = function() {
         width = this.naturalWidth;
         height = this.naturalHeight;
         
+        mainEntrance.pos = [height * 0.200, width * 0.210];
+        pathNetwork.nodes['entrada'] = mainEntrance.pos;
+
+        // Inicializar posiciones de nodos
+        pathNetwork.nodes['entrada2'] = [height * 0.298, width * 0.290];
+        pathNetwork.nodes['oeste1'] = [height * 0.320, width * 0.121];
+        pathNetwork.nodes['oeste2'] = [height * 0.434, width * 0.200];
+        pathNetwork.nodes['oeste3'] = [height * 0.415, width * 0.276];
+        pathNetwork.nodes['oeste4'] = [height * 0.447, width * 0.304];
+        pathNetwork.nodes['oeste5'] = [height * 0.601, width * 0.426];
+        pathNetwork.nodes['oeste6'] = [height * 0.732, width * 0.513];
+        pathNetwork.nodes['oeste7'] = [height * 0.745, width * 0.484];
+        pathNetwork.nodes['oeste8'] = [height * 0.765, width * 0.524];
+        pathNetwork.nodes['oeste9'] = [height * 0.505, width * 0.348];
+        pathNetwork.nodes['este1'] = [height * 0.434, width * 0.512];
+        pathNetwork.nodes['este2'] = [height * 0.499, width * 0.560];
+        pathNetwork.nodes['este3'] = [height * 0.481, width * 0.613];
+        pathNetwork.nodes['este4'] = [height * 0.567, width * 0.666];
+        pathNetwork.nodes['este5'] = [height * 0.622, width * 0.702];
+        pathNetwork.nodes['este6'] = [height * 0.440, width * 0.630];
+        pathNetwork.nodes['este7'] = [height * 0.366, width * 0.576];
+        pathNetwork.nodes['central1'] = [height * 0.413, width * 0.372];
+        pathNetwork.nodes['central2'] = [height * 0.459, width * 0.411];
+        pathNetwork.nodes['central3'] = [height * 0.551, width * 0.478];
+        pathNetwork.nodes['central4'] = [height * 0.692, width * 0.588];
+        pathNetwork.nodes['norte1'] = [height * 0.798, width * 0.697];
+        pathNetwork.nodes['norte2'] = [height * 0.708, width * 0.849];
+        pathNetwork.nodes['auxiliar1'] = [height * 0.470, width * 0.443];
+        pathNetwork.nodes['auxiliar2'] = [height * 0.496, width * 0.472];
+        pathNetwork.nodes['auxiliar3'] = [height * 0.534, width * 0.647];
+        pathNetwork.nodes['auxiliar4'] = [height * 0.598, width * 0.691];
+        pathNetwork.nodes['auxiliar5'] = [height * 0.778, width * 0.662];
+        pathNetwork.nodes['auxiliar6'] = [height * 0.424, width * 0.258];
+
+        // Verificar que el elemento del mapa existe
+        const mapElement = document.getElementById('enhanced-map');
+        if (!mapElement) {
+            console.error('❌ Elemento #enhanced-map no encontrado');
+            return;
+        }
+
+        // Inicializar Leaflet
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png'
+        });
+        
         map = L.map('enhanced-map', {
             crs: L.CRS.Simple,
             maxBoundsViscosity: 1.0,
-            minZoom: -1,
+            minZoom: -0.6,
             maxZoom: 0.5,
             zoomControl: false,
             tap: true,
@@ -190,126 +1003,605 @@ document.addEventListener('DOMContentLoaded', function() {
         map.setMaxBounds(bounds);
         map.setView([height / 2, width / 2], -1);
 
-        // Marcadores
+        // AHORA SÍ podemos añadir el event listener al mapa
+        map.on('click', function(e) {
+            if (!debugMode) return;
+            
+            const latlng = e.latlng;
+            const coords = `[height * ${(latlng.lat / height).toFixed(3)}, width * ${(latlng.lng / width).toFixed(3)}]`;
+            console.log(`%c📍 Coordenadas: ${coords}`, 'color: #3B82F6; font-weight: bold; font-size: 14px');
+            
+            navigator.clipboard.writeText(coords).then(() => {
+                console.log('✅ Coordenadas copiadas al portapapeles');
+            }).catch(() => {
+                console.log('❌ No se pudo copiar al portapapeles');
+            });
+        });
+
+        // Horarios
+        const schedules = {
+            weekdays: { 
+                0: { closed: true },
+                1: { open: '08:00', close: '20:00' },
+                2: { open: '08:00', close: '20:00' },
+                3: { open: '08:00', close: '20:00' },
+                4: { open: '08:00', close: '20:00' },
+                5: { open: '08:00', close: '20:00' },
+                6: { closed: true }
+            },
+            cafeteria: {
+                0: { closed: true },
+                1: { open: '08:00', close: '18:00' },
+                2: { open: '08:00', close: '18:00' },
+                3: { open: '08:00', close: '18:00' },
+                4: { open: '08:00', close: '18:00' },
+                5: { open: '08:00', close: '16:00' },
+                6: { closed: true }
+            },
+            gym: {
+                0: { closed: true },
+                1: { open: '07:00', close: '21:00' },
+                2: { open: '07:00', close: '21:00' },
+                3: { open: '07:00', close: '21:00' },
+                4: { open: '07:00', close: '21:00' },
+                5: { open: '07:00', close: '19:00' },
+                6: { open: '09:00', close: '14:00' }
+            },
+            biblioteca: {
+                0: { closed: true },
+                1: { open: '08:00', close: '21:00' },
+                2: { open: '08:00', close: '21:00' },
+                3: { open: '08:00', close: '21:00' },
+                4: { open: '08:00', close: '21:00' },
+                5: { open: '08:00', close: '19:00' },
+                6: { open: '09:00', close: '13:00' }
+            },
+            admin: {
+                0: { closed: true },
+                1: { open: '09:00', close: '17:00' },
+                2: { open: '09:00', close: '17:00' },
+                3: { open: '09:00', close: '17:00' },
+                4: { open: '09:00', close: '17:00' },
+                5: { open: '09:00', close: '16:00' },
+                6: { closed: true }
+            }
+        };
+
+        // Marcadores predefinidos
         const predefinedMarkers = [
-            { pos: [height * 0.277, width * 0.323], name: "Edificio 1", type: "edificio", description: "Edificio de informaciones y asistentes sociales" },
-            { pos: [height * 0.394, width * 0.407], name: "Edificio 2", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
-            { pos: [height * 0.443, width * 0.549], name: "Edificio 3", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
-            { pos: [height * 0.504, width * 0.487], name: "Biblioteca", type: "libreria", description: "Venta de libros y sala de estudio" },
-            { pos: [height * 0.533, width * 0.667], name: "Servicio de impresiones", type: "impresion", description: "Libreria con servicio de impresiones" },
-            { pos: [height * 0.59, width * 0.705], name: "DAAS", type: "daas", description: "Dirección de Acompañamiento Académico y Socioemocional" },
-            { pos: [height * 0.77, width * 0.88], name: "Tesoreria", type: "tesoreria", description: "Gestión de pagos y trámites financieros" },
-            { pos: [height * 0.92, width * 0.575], name: "Edificio 12", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
-            { pos: [height * 0.842, width * 0.515], name: "Edificio 13", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
-            { pos: [height * 0.767, width * 0.45], name: "Edificio 14", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
-            { pos: [height * 0.654, width * 0.376], name: "Edificio 15", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
-            { pos: [height * 0.497, width * 0.255], name: "Edificio 16", type: "edificio", description: "Edificio de carreras técnicas" },
-            { pos: [height * 0.418, width * 0.233], name: "Edificio 17", type: "edificio", description: "Edificio con apartado de informática y enfermería" },
-            { pos: [height * 0.36, width * 0.597], name: "Edificio 21", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
-            { pos: [height * 0.35, width * 0.47], name: "Biblioteca Central", type: "libreria", description: "Recursos académicos y salas de estudio" },
-            { pos: [height * 0.49, width * 0.64], name: "Cafetería", type: "comer", description: "Cafetería para todo público" },
-            { pos: [height * 0.79, width * 0.67], name: "Comedor", type: "comer", description: "Comedor piso 1" },
-            { pos: [height * 0.757, width * 0.81], name: "Estacionamiento", type: "estacionamiento", description: "Zona de estacionamiento para todo público" },
-            { pos: [height * 0.8, width * 0.77], name: "Baños Públicos", type: "baños", description: "Baños para todo público" },
-            { pos: [height * 0.42, width * 0.181], name: "Estacionamiento de Bicicletas", type: "bicicletas", description: "Zona segura para estacionar bicicletas" },
-            { pos: [height * 0.63, width * 0.395], name: "Gimnasio", type: "gym", description: "Gimnasio en edificio 15" },
-            { pos: [height * 0.56, width * 0.64], name: "Zona de Calistenia", type: "calistenia", description: "Área al aire libre para ejercicios" }
+            { pos: [height * 0.277, width * 0.323], name: "Edificio 1", type: "edificio", description: "Edificio de informaciones y asistentes sociales", schedule: schedules.weekdays, contact: "Ext. 1101", services: ["WiFi", "Enchufes", "Accesibilidad"], capacity: "300 personas" },
+            { pos: [height * 0.394, width * 0.407], name: "Edificio 2", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1102", services: ["WiFi", "Baños", "Sala de estar"], capacity: "400 personas" },
+            { pos: [height * 0.443, width * 0.549], name: "Edificio 3", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1103", services: ["WiFi", "Baños", "Sala de estar"], capacity: "350 personas" },
+            { pos: [height * 0.504, width * 0.487], name: "Biblioteca", type: "libreria", description: "Venta de libros y sala de estudio", schedule: schedules.biblioteca, contact: "Ext. 1201 | biblioteca@uct.cl", services: ["WiFi", "Computadores", "Impresora", "Sala de estudio"], capacity: "150 personas" },
+            { pos: [height * 0.533, width * 0.667], name: "Servicio de impresiones", type: "impresion", description: "Libreria con servicio de impresiones", schedule: schedules.weekdays, contact: "Ext. 1301", services: ["Impresión B/N", "Impresión Color", "Anillado", "Fotocopias"], capacity: "20 personas" },
+            { pos: [height * 0.59, width * 0.705], name: "DAAS", type: "daas", description: "Dirección de Acompañamiento Académico y Socioemocional", schedule: schedules.admin, contact: "Ext. 1401 | daas@uct.cl", services: ["Orientación académica", "Apoyo psicológico", "Tutorías"], capacity: "50 personas" },
+            { pos: [height * 0.77, width * 0.88], name: "Tesoreria", type: "tesoreria", description: "Gestión de pagos y trámites financieros", schedule: schedules.admin, contact: "Ext. 1501 | tesoreria@uct.cl", services: ["Pagos", "Becas", "Certificados"], capacity: "30 personas" },
+            { pos: [height * 0.92, width * 0.575], name: "Edificio 12", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1112", services: ["WiFi", "Baños", "Sala de estar"], capacity: "300 personas" },
+            { pos: [height * 0.842, width * 0.515], name: "Edificio 13", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1113", services: ["WiFi", "Baños", "Sala de estar"], capacity: "280 personas" },
+            { pos: [height * 0.767, width * 0.45], name: "Edificio 14", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1114", services: ["WiFi", "Baños", "Sala de estar"], capacity: "320 personas" },
+            { pos: [height * 0.654, width * 0.376], name: "Edificio 15", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1115", services: ["WiFi", "Baños", "Sala de estar", "Gimnasio"], capacity: "400 personas" },
+            { pos: [height * 0.497, width * 0.255], name: "Edificio 16", type: "edificio", description: "Edificio de carreras técnicas", schedule: schedules.weekdays, contact: "Ext. 1116", services: ["WiFi", "Laboratorios", "Talleres"], capacity: "250 personas" },
+            { pos: [height * 0.418, width * 0.233], name: "Edificio 17", type: "edificio", description: "Edificio con apartado de informática y enfermería", schedule: schedules.weekdays, contact: "Ext. 1117 | enfermeria@uct.cl", services: ["WiFi", "Lab. Informática", "Enfermería"], capacity: "200 personas" },
+            { pos: [height * 0.36, width * 0.597], name: "Edificio 21", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1121", services: ["WiFi", "Baños", "Sala de estar"], capacity: "350 personas" },
+            { pos: [height * 0.35, width * 0.47], name: "Biblioteca Central", type: "libreria", description: "Recursos académicos y salas de estudio", schedule: schedules.biblioteca, contact: "Ext. 1202 | bibcentral@uct.cl", services: ["WiFi", "Computadores", "Salas grupales", "Libros digitales"], capacity: "200 personas" },
+            { pos: [height * 0.49, width * 0.64], name: "Cafetería", type: "comer", description: "Cafetería para todo público", schedule: schedules.cafeteria, contact: "Sin teléfono", services: ["Café", "Snacks", "Almuerzos", "WiFi"], capacity: "80 personas" },
+            { pos: [height * 0.79, width * 0.67], name: "Comedor", type: "comer", description: "Comedor piso 1", schedule: schedules.cafeteria, contact: "Ext. 1601", services: ["Menú del día", "Cafetería", "Microondas"], capacity: "120 personas" },
+            { pos: [height * 0.757, width * 0.81], name: "Estacionamiento", type: "estacionamiento", description: "Zona de estacionamiento para todo público", schedule: null, contact: "Seguridad: Ext. 1700", services: ["Espacios cubiertos", "Vigilancia 24/7"], capacity: "150 vehículos" },
+            { pos: [height * 0.8, width * 0.77], name: "Baños Públicos", type: "baños", description: "Baños para todo público", schedule: null, contact: "Mantenimiento: Ext. 1800", services: ["Accesibilidad", "Agua caliente"], capacity: "20 personas" },
+            { pos: [height * 0.42, width * 0.181], name: "Estacionamiento de Bicicletas", type: "bicicletas", description: "Zona segura para estacionar bicicletas", schedule: null, contact: "Seguridad: Ext. 1700", services: ["Techado", "Vigilancia", "Bomba de aire"], capacity: "50 bicicletas" },
+            { pos: [height * 0.63, width * 0.395], name: "Gimnasio", type: "gym", description: "Gimnasio en edificio 15", schedule: schedules.gym, contact: "Ext. 1901 | gym@uct.cl", services: ["Máquinas", "Pesas libres", "Duchas", "Casilleros"], capacity: "60 personas" },
+            { pos: [height * 0.56, width * 0.64], name: "Zona de Calistenia", type: "calistenia", description: "Área al aire libre para ejercicios", schedule: null, contact: "Sin contacto", services: ["Barras", "Paralelas", "Aire libre"], capacity: "30 personas" }
         ];
 
         const markersByType = {};
+        const routeFromSelect = document.getElementById('route-from');
+        const routeToSelect = document.getElementById('route-to');
 
         predefinedMarkers.forEach(marker => {
             const icon = customIcons[marker.type];
             if (!icon) return;
             
+            const isOpen = isOpenNow(marker.schedule);
+            const statusBadge = marker.schedule ? getStatusBadge(marker.schedule) : '';
+            const todaySchedule = getTodaySchedule(marker.schedule);
+            
+            const popupContent = `
+                <div class="p-2 min-w-[280px]">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg text-gray-800">${marker.name}</h3>
+                        ${statusBadge}
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">${marker.description}</p>
+                    
+                    ${marker.schedule ? `
+                        <div class="mb-3 p-2 bg-gray-50 rounded-lg">
+                            <div class="flex items-center gap-2 text-sm">
+                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="font-medium text-gray-700">Hoy: ${todaySchedule}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="mb-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <span>${marker.contact}</span>
+                        </div>
+                        
+                        ${marker.capacity ? `
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                <span>Capacidad: ${marker.capacity}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${marker.services && marker.services.length > 0 ? `
+                        <div class="mb-3">
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Servicios disponibles:</p>
+                            <div class="flex flex-wrap gap-1">
+                                ${marker.services.map(service => `
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 border border-blue-200">
+                                        ${service}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex gap-2 mt-3">
+                        <button class="route-to-here flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition font-medium flex items-center justify-center gap-1" data-name="${marker.name}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                            </svg>
+                            Cómo llegar
+                        </button>
+                        <button class="share-location flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-1" data-name="${marker.name}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                            </svg>
+                            Compartir
+                        </button>
+                    </div>
+                </div>
+            `;
+            
             const leafletMarker = L.marker(marker.pos, { icon })
                 .addTo(map)
-                .bindPopup(
-                    `<div class="p-2">
-                        <h3 class="font-bold text-lg mb-2">${marker.name}</h3>
-                        <p class="text-sm text-gray-600 mb-2">${marker.description}</p>
-                    </div>`,
-                    {
-                        autoPan: true,
-                        autoPanPadding: [10, 10],
-                        keepInView: true,
-                    }
-                );
+                .bindPopup(popupContent, {
+                    autoPan: true,
+                    autoPanPadding: [10, 10],
+                    keepInView: true,
+                    maxWidth: 320
+                });
 
             if (!markersByType[marker.type]) {
                 markersByType[marker.type] = [];
             }
             markersByType[marker.type].push(leafletMarker);
+            
+            markersMap[marker.name] = {
+                marker: leafletMarker,
+                type: marker.type,
+                pos: marker.pos,
+                data: marker,
+                isOpen: isOpen
+            };
+
+            if (routeFromSelect) {
+                const option1 = document.createElement('option');
+                option1.value = marker.name;
+                option1.textContent = marker.name;
+                routeFromSelect.appendChild(option1);
+            }
+
+            if (routeToSelect) {
+                const option2 = document.createElement('option');
+                option2.value = marker.name;
+                option2.textContent = marker.name;
+                routeToSelect.appendChild(option2);
+            }
         });
 
-        // Función para actualizar marcadores
+        // Event listeners para botones en popups
+        map.on('popupopen', function(e) {
+            const popup = e.popup;
+            
+            const routeBtn = popup.getElement()?.querySelector('.route-to-here');
+            if (routeBtn) {
+                routeBtn.addEventListener('click', function() {
+                    const locationName = this.dataset.name;
+                    const routeTo = document.getElementById('route-to');
+                    const routeFrom = document.getElementById('route-from');
+                    if (routeTo) routeTo.value = locationName;
+                    if (routeFrom) routeFrom.value = '';
+                    popup.close();
+                    document.getElementById('route-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            }
+
+            const shareBtn = popup.getElement()?.querySelector('.share-location');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', function() {
+                    const locationName = this.dataset.name;
+                    shareLocation(locationName);
+                });
+            }
+        });
+
+        function shareLocation(locationName) {
+            const url = `${window.location.origin}${window.location.pathname}?location=${encodeURIComponent(locationName)}`;
+            const text = `📍 Ubicación en Campus UCT: ${locationName}\n${url}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: `Campus UCT - ${locationName}`,
+                    text: text,
+                    url: url
+                }).catch(err => console.log('Error al compartir:', err));
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('¡Enlace copiado al portapapeles!');
+                }).catch(err => {
+                    alert('No se pudo copiar el enlace');
+                });
+            }
+        }
+
         function updateMarkers() {
+            const openNowFilter = document.getElementById('filter-open-now');
+            const openNowChecked = openNowFilter ? openNowFilter.checked : false;
+            
             document.querySelectorAll('.marker-filter').forEach(cb => {
                 const type = cb.dataset.type;
                 const show = cb.checked;
 
                 markersByType[type]?.forEach(marker => {
-                    if (show) {
-                        marker.addTo(map);
-                    } else {
-                        map.removeLayer(marker);
+                    const markerName = Object.keys(markersMap).find(
+                        key => markersMap[key].marker === marker
+                    );
+                    const markerData = markersMap[markerName];
+                    
+                    let shouldShow = show;
+                    if (openNowChecked && markerData) {
+                        shouldShow = shouldShow && markerData.isOpen;
+                    }
+                    
+                    if (map) {
+                        if (shouldShow) {
+                            marker.addTo(map);
+                        } else {
+                            map.removeLayer(marker);
+                        }
                     }
                 });
             });
         }
 
-        // Event listeners para filtros
+        function highlightMarker(locationName) {
+            const markerData = markersMap[locationName];
+            if (!markerData || !map) return;
+
+            if (currentHighlightedMarker) {
+                const prevMarker = currentHighlightedMarker.marker;
+                const prevType = currentHighlightedMarker.type;
+                prevMarker.setIcon(customIcons[prevType]);
+            }
+
+            const typeCheckbox = document.querySelector(`.marker-filter[data-type="${markerData.type}"]`);
+            if (typeCheckbox && !typeCheckbox.checked) {
+                typeCheckbox.checked = true;
+                updateMarkers();
+            }
+
+            markerData.marker.setIcon(highlightedIcons[markerData.type]);
+            currentHighlightedMarker = markerData;
+
+            map.setView(markerData.pos, 0.2, {
+                animate: true,
+                duration: 0.8
+            });
+
+            setTimeout(() => {
+                markerData.marker.openPopup();
+            }, 900);
+
+            setTimeout(() => {
+                if (currentHighlightedMarker && currentHighlightedMarker.marker === markerData.marker) {
+                    markerData.marker.setIcon(customIcons[markerData.type]);
+                    currentHighlightedMarker = null;
+                }
+            }, 5000);
+        }
+
+        // Sistema de rutas - Event Listeners
+        const calculateBtn = document.getElementById('calculate-route');
+        const routeBtnText = document.getElementById('route-btn-text');
+        
+        if (calculateBtn) {
+            calculateBtn.addEventListener('click', () => {
+                const routeFrom = document.getElementById('route-from');
+                const routeTo = document.getElementById('route-to');
+                
+                const fromValue = routeFrom ? routeFrom.value : '';
+                const toValue = routeTo ? routeTo.value : '';
+
+                if (!toValue) {
+                    if (routeTo) {
+                        routeTo.style.borderColor = '#EF4444';
+                        setTimeout(() => {
+                            routeTo.style.borderColor = '';
+                        }, 2000);
+                    }
+                    alert('Por favor selecciona un destino');
+                    return;
+                }
+
+                // Verificar si se usa ubicación del usuario
+                if (fromValue === '__user_location__') {
+                    if (!userLocation) {
+                        alert('⚠️ Primero debes obtener tu ubicación usando el botón "Mi Ubicación"');
+                        return;
+                    }
+                }
+
+                if (fromValue && fromValue === toValue) {
+                    alert('El origen y destino no pueden ser el mismo lugar');
+                    return;
+                }
+
+                calculateBtn.disabled = true;
+                if (routeBtnText) routeBtnText.textContent = 'Calculando...';
+
+                // Determinar posición de origen
+                let fromPos, fromName;
+                if (fromValue === '__user_location__') {
+                    fromPos = userLocation;
+                    fromName = 'Tu Ubicación';
+                } else if (fromValue) {
+                    fromPos = markersMap[fromValue].pos;
+                    fromName = fromValue;
+                } else {
+                    fromPos = mainEntrance.pos;
+                    fromName = 'Entrada Principal';
+                }
+
+                const toPos = markersMap[toValue].pos;
+
+                setTimeout(() => {
+                    drawRoute(fromPos, toPos, fromName, toValue);
+                    calculateBtn.disabled = false;
+                    if (routeBtnText) routeBtnText.textContent = 'Calcular Ruta';
+                }, 300);
+            });
+        }
+
+        const clearBtn = document.getElementById('clear-route');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                clearRoute();
+                const routeFrom = document.getElementById('route-from');
+                const routeTo = document.getElementById('route-to');
+                if (routeFrom) routeFrom.value = '';
+                if (routeTo) routeTo.value = '';
+                
+                if (map) {
+                    map.setView([height / 2, width / 2], -1);
+                }
+            });
+        }
+
+        // Botón de obtener ubicación
+        const getLocationBtn = document.getElementById('get-location-btn');
+        if (getLocationBtn) {
+            getLocationBtn.addEventListener('click', getUserLocation);
+        }
+
+        // Botón de seguimiento continuo
+        const trackLocationBtn = document.getElementById('track-location-btn');
+        if (trackLocationBtn) {
+            let isTracking = false;
+            trackLocationBtn.addEventListener('click', function() {
+                isTracking = !isTracking;
+                
+                if (isTracking) {
+                    startLocationTracking();
+                    this.classList.remove('bg-gray-500');
+                    this.classList.add('bg-green-600');
+                    this.innerHTML = `
+                        <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+                        </svg>
+                        Rastreando...
+                    `;
+                } else {
+                    stopLocationTracking();
+                    this.classList.remove('bg-green-600');
+                    this.classList.add('bg-gray-500');
+                    this.innerHTML = `
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                        </svg>
+                        Seguir
+                    `;
+                }
+            });
+        }
+
+        const swapBtn = document.getElementById('swap-route');
+        if (swapBtn) {
+            swapBtn.addEventListener('click', () => {
+                const routeFrom = document.getElementById('route-from');
+                const routeTo = document.getElementById('route-to');
+                
+                if (routeFrom && routeTo) {
+                    const from = routeFrom.value;
+                    const to = routeTo.value;
+                    routeFrom.value = to;
+                    routeTo.value = from;
+                    
+                    if (routeLine && to && calculateBtn) {
+                        setTimeout(() => {
+                            calculateBtn.click();
+                        }, 100);
+                    }
+                }
+            });
+        }
+
+        const routeFromEl = document.getElementById('route-from');
+        const routeToEl = document.getElementById('route-to');
+        
+        if (routeFromEl) {
+            routeFromEl.addEventListener('change', () => {
+                if (routeLine) clearRoute();
+            });
+        }
+
+        if (routeToEl) {
+            routeToEl.addEventListener('change', () => {
+                if (routeLine) clearRoute();
+            });
+        }
+
+        window.addEventListener('searchLocation', (e) => {
+            highlightMarker(e.detail.name);
+        });
+
         document.querySelectorAll('.marker-filter').forEach(cb => {
             cb.addEventListener('change', updateMarkers);
         });
 
-        // Botones Todos/Ninguno
-        document.getElementById('select-all').addEventListener('click', () => {
-            document.querySelectorAll('.marker-filter').forEach(cb => cb.checked = true);
-            updateMarkers();
-        });
+        const openNowFilter = document.getElementById('filter-open-now');
+        if (openNowFilter) {
+            openNowFilter.addEventListener('change', updateMarkers);
+        }
+
+        const selectAllBtn = document.getElementById('select-all');
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', () => {
+                document.querySelectorAll('.marker-filter').forEach(cb => cb.checked = true);
+                updateMarkers();
+            });
+        }
         
-        document.getElementById('deselect-all').addEventListener('click', () => {
-            document.querySelectorAll('.marker-filter').forEach(cb => cb.checked = false);
-            updateMarkers();
-        });
+        const deselectAllBtn = document.getElementById('deselect-all');
+        if (deselectAllBtn) {
+            deselectAllBtn.addEventListener('click', () => {
+                document.querySelectorAll('.marker-filter').forEach(cb => cb.checked = false);
+                updateMarkers();
+            });
+        }
 
-        // Controles de zoom personalizados
-        document.getElementById('zoom-in').addEventListener('click', () => {
-            map.zoomIn();
-        });
+        const zoomInBtn = document.getElementById('zoom-in');
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', () => {
+                if (map) map.zoomIn();
+            });
+        }
 
-        document.getElementById('zoom-out').addEventListener('click', () => {
-            map.zoomOut();
-        });
+        const zoomOutBtn = document.getElementById('zoom-out');
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', () => {
+                if (map) map.zoomOut();
+            });
+        }
+
+        const debugBtn = document.getElementById('toggle-debug');
+        if (debugBtn) {
+            debugBtn.addEventListener('click', function() {
+                debugMode = !debugMode;
+                
+                if (debugMode) {
+                    this.style.background = '#059669';
+                    this.textContent = '🛠️ Debug ON';
+                    drawDebugNodes();
+                    console.log('%c🛠️ MODO DEBUG ACTIVADO', 'color: #10B981; font-weight: bold; font-size: 16px');
+                    console.log('%c📍 Haz clic en el mapa para obtener coordenadas', 'color: #3B82F6; font-size: 14px');
+                    console.log('%c🟢 Haz clic en los nodos verdes para ver su información', 'color: #059669; font-size: 14px');
+                } else {
+                    this.style.background = '#16A34A';
+                    this.textContent = '🛠️ Debug';
+                    
+                    pathNodes.forEach(node => {
+                        if (map && map.hasLayer(node)) {
+                            map.removeLayer(node);
+                        }
+                    });
+                    pathNodes = [];
+                    
+                    console.log('%c🛠️ Modo debug desactivado', 'color: #6B7280; font-size: 14px');
+                }
+            });
+        }
+
+        const closeInfoBtn = document.getElementById('close-info-panel');
+        if (closeInfoBtn) {
+            closeInfoBtn.addEventListener('click', () => {
+                const infoPanel = document.getElementById('info-panel');
+                if (infoPanel) infoPanel.classList.add('hidden');
+            });
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const locationParam = urlParams.get('location');
+        if (locationParam) {
+            setTimeout(() => {
+                highlightMarker(locationParam);
+            }, 1000);
+        }
+
+        console.log('✅ Mapa inicializado correctamente');
+    };
+
+    img.onerror = function() {
+        console.error('❌ Error al cargar la imagen del mapa: /Map.png');
     };
 
     img.src = '/Map.png';
 
     // Pantalla completa
-    document.getElementById('fullscreen-btn').addEventListener('click', function() {
-        const mapWrapper = document.getElementById('map-wrapper');
-        const exitBtn = document.getElementById('exit-fullscreen');
-        const mapDiv = document.getElementById('enhanced-map');
-        const customControls = document.querySelectorAll('#zoom-in, #zoom-out, #fullscreen-btn');
-        
-        if (!document.fullscreenElement) {
-            mapWrapper.requestFullscreen().then(() => {
-                mapDiv.style.width = '100vw';
-                mapDiv.style.height = '100vh';
-                customControls.forEach(btn => btn.style.display = 'none');
-                setTimeout(() => {
-                    map.invalidateSize();
-                    map.fitBounds(bounds);
-                }, 300);
-                exitBtn.classList.remove('hidden');
-            });
-        }
-    });
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', function() {
+            const mapWrapper = document.getElementById('map-wrapper');
+            const exitBtn = document.getElementById('exit-fullscreen');
+            const mapDiv = document.getElementById('enhanced-map');
+            const customControls = document.querySelectorAll('#zoom-in, #zoom-out, #fullscreen-btn');
+            
+            if (mapWrapper && !document.fullscreenElement) {
+                mapWrapper.requestFullscreen().then(() => {
+                    if (mapDiv) {
+                        mapDiv.style.width = '100vw';
+                        mapDiv.style.height = '100vh';
+                    }
+                    customControls.forEach(btn => btn.style.display = 'none');
+                    setTimeout(() => {
+                        if (map) {
+                            map.invalidateSize();
+                            map.fitBounds(bounds);
+                        }
+                    }, 300);
+                    if (exitBtn) exitBtn.classList.remove('hidden');
+                });
+            }
+        });
+    }
 
-    document.getElementById('exit-fullscreen').addEventListener('click', function() {
-        document.exitFullscreen();
-    });
+    const exitFullscreenBtn = document.getElementById('exit-fullscreen');
+    if (exitFullscreenBtn) {
+        exitFullscreenBtn.addEventListener('click', function() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        });
+    }
 
     document.addEventListener('fullscreenchange', function() {
         const mapDiv = document.getElementById('enhanced-map');
@@ -317,13 +1609,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const customControls = document.querySelectorAll('#zoom-in, #zoom-out, #fullscreen-btn');
         
         if (!document.fullscreenElement) {
-            mapDiv.style.width = '100%';
-            mapDiv.style.height = '600px';
+            if (mapDiv) {
+                mapDiv.style.width = '100%';
+                mapDiv.style.height = '600px';
+            }
             customControls.forEach(btn => btn.style.display = 'flex');
-            exitBtn.classList.add('hidden');
+            if (exitBtn) exitBtn.classList.add('hidden');
             setTimeout(() => {
-                map.invalidateSize();
-                map.fitBounds(bounds);
+                if (map) {
+                    map.invalidateSize();
+                    map.fitBounds(bounds);
+                }
             }, 300);
         }
     });
@@ -337,7 +1633,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-    /* Checkboxes personalizados */
     .custom-checkbox {
         display: flex;
         align-items: center;
@@ -401,7 +1696,126 @@ document.addEventListener('DOMContentLoaded', function() {
         font-size: 14px;
     }
 
-    /* Remover bordes blancos del mapa */
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+
+    .marker-pulse {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Marcadores de ruta */
+    .route-marker {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        border: 3px solid white;
+        animation: markerPop 0.3s ease-out;
+    }
+
+    @keyframes markerPop {
+        0% {
+            transform: scale(0);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .route-start {
+        background: linear-gradient(135deg, #10B981, #059669);
+    }
+
+    .route-end {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+    }
+
+    /* Transiciones suaves para los selectores */
+    select {
+        transition: all 0.2s ease;
+    }
+
+    select:focus {
+        transform: scale(1.01);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Mejorar el panel de ruta */
+    #route-panel {
+        transition: all 0.3s ease;
+    }
+
+    #route-info {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Nodos de debug para mapear rutas */
+    .debug-node {
+        width: 12px;
+        height: 12px;
+        background: #10B981;
+        border: 2px solid white;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        cursor: pointer;
+        position: relative;
+    }
+
+    .debug-node:hover {
+        background: #059669;
+        transform: scale(1.5);
+        z-index: 1000;
+    }
+
+    .debug-node:hover .node-label {
+        display: block;
+    }
+
+    .node-label {
+        display: none;
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: bold;
+        color: #059669;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        z-index: 1001;
+    }
+
     .leaflet-control-attribution {
         display: none !important;
     }
@@ -423,14 +1837,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     .leaflet-pane {
-        background: transparent !important;
-    }
-
-    .leaflet-tile-pane {
-        background: transparent !important;
-    }
-
-    .leaflet-overlay-pane {
         background: transparent !important;
     }
 

@@ -35,3 +35,9 @@ const { title, description } = Astro.props;
     min-height: 100vh;
   }
 </style>
+
+<style is:global>
+  @import 'tailwindcss';
+
+  @plugin "@midudev/tailwind-animations";
+</style>

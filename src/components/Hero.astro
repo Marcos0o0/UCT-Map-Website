@@ -1,5 +1,5 @@
 ---
-// Hero.astro
+// Componente Hero.astro
 ---
 
 <!-- Texto inicial -->
@@ -15,9 +15,15 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
         <input
+            id="search-input"
             type="text"
             placeholder="Buscar edificio, sala, cafetería..."
-            class="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none text-lg"/>
+            class="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none text-lg"
+            autocomplete="off"/>
+        
+        <!-- Resultados de búsqueda -->
+        <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border-2 border-gray-200 max-h-96 overflow-y-auto z-50">
+        </div>
     </div>
 </div>
 
@@ -39,7 +45,6 @@
 
 <script>
     function switchView(view) {
-        // Actualizar botones
         const btn2d = document.getElementById('btn-2d');
         const btn3d = document.getElementById('btn-3d');
         
@@ -51,7 +56,6 @@
             btn3d?.classList.add('active');
         }
         
-        // Mostrar/ocultar vistas
         const view2d = document.getElementById('view-2d');
         const view3d = document.getElementById('view-3d');
         
@@ -64,8 +68,121 @@
         }
     }
 
-    // Event listeners
+    // Lista de ubicaciones para búsqueda
+    const locations = [
+        { name: "Edificio 1", type: "edificio", description: "Edificio de informaciones y asistentes sociales" },
+        { name: "Edificio 2", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
+        { name: "Edificio 3", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
+        { name: "Edificio 12", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
+        { name: "Edificio 13", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
+        { name: "Edificio 14", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
+        { name: "Edificio 15", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
+        { name: "Edificio 16", type: "edificio", description: "Edificio de carreras técnicas" },
+        { name: "Edificio 17", type: "edificio", description: "Edificio con apartado de informática y enfermería" },
+        { name: "Edificio 21", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar" },
+        { name: "Biblioteca", type: "libreria", description: "Venta de libros y sala de estudio" },
+        { name: "Biblioteca Central", type: "libreria", description: "Recursos académicos y salas de estudio" },
+        { name: "Servicio de impresiones", type: "impresion", description: "Libreria con servicio de impresiones" },
+        { name: "DAAS", type: "daas", description: "Dirección de Acompañamiento Académico y Socioemocional" },
+        { name: "Tesoreria", type: "tesoreria", description: "Gestión de pagos y trámites financieros" },
+        { name: "Cafetería", type: "comer", description: "Cafetería para todo público" },
+        { name: "Comedor", type: "comer", description: "Comedor piso 1" },
+        { name: "Estacionamiento", type: "estacionamiento", description: "Zona de estacionamiento para todo público" },
+        { name: "Baños Públicos", type: "baños", description: "Baños para todo público" },
+        { name: "Estacionamiento de Bicicletas", type: "bicicletas", description: "Zona segura para estacionar bicicletas" },
+        { name: "Gimnasio", type: "gym", description: "Gimnasio en edificio 15" },
+        { name: "Zona de Calistenia", type: "calistenia", description: "Área al aire libre para ejercicios" }
+    ];
+
+    const typeIcons = {
+        edificio: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building-icon lucide-building"><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M12 6h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/><path d="M8 6h.01"/><path d="M9 22v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/><rect x="4" y="2" width="16" height="20" rx="2"/></svg>',
+        libreria: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-icon lucide-book-open"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>',
+        comer: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utensils-icon lucide-utensils"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
+        estacionamiento: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-parking-icon lucide-circle-parking"><circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>',
+        baños: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-toilet-icon lucide-toilet"><path d="M7 12h13a1 1 0 0 1 1 1 5 5 0 0 1-5 5h-.598a.5.5 0 0 0-.424.765l1.544 2.47a.5.5 0 0 1-.424.765H5.402a.5.5 0 0 1-.424-.765L7 18"/><path d="M8 18a5 5 0 0 1-5-5V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8"/></svg>',
+        bicicletas: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bike-icon lucide-bike"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>',
+        gym: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell-icon lucide-dumbbell"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/><path d="m9.6 14.4 4.8-4.8"/></svg>',
+        calistenia: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-biceps-flexed-icon lucide-biceps-flexed"><path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1"/><path d="M15 14a5 5 0 0 0-7.584 2"/><path d="M9.964 6.825C8.019 7.977 9.5 13 8 15"/></svg>',
+        impresion: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer-icon lucide-printer"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>',
+        daas: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook-pen-icon lucide-notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>',
+        tesoreria: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet-icon lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>'
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+
+        // Función de búsqueda
+        searchInput?.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (query.length < 2) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+
+            const filtered = locations.filter(loc => 
+                loc.name.toLowerCase().includes(query) || 
+                loc.description.toLowerCase().includes(query) ||
+                loc.type.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                searchResults.innerHTML = '<div class="p-4 text-gray-500 text-center">No se encontraron resultados</div>';
+                searchResults.classList.remove('hidden');
+                return;
+            }
+
+            searchResults.innerHTML = filtered.map(loc => `
+                <div class="search-item p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0" data-location="${loc.name}">
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl pt-1">${typeIcons[loc.type] || '📍'}</span>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-800">${loc.name}</h4>
+                            <p class="text-sm text-gray-600">${loc.description}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            searchResults.classList.remove('hidden');
+
+            // Agregar event listeners a los resultados
+            document.querySelectorAll('.search-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const locationName = item.dataset.location;
+                    
+                    // Asegurarse de estar en la vista 2D
+                    switchView('2d');
+                    
+                    // Disparar evento personalizado para el mapa
+                    window.dispatchEvent(new CustomEvent('searchLocation', { 
+                        detail: { name: locationName } 
+                    }));
+                    
+                    // Limpiar búsqueda
+                    searchInput.value = '';
+                    searchResults.classList.add('hidden');
+                    
+                    // Scroll suave al mapa
+                    setTimeout(() => {
+                        document.getElementById('view-2d')?.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }, 100);
+                });
+            });
+        });
+
+        // Cerrar resultados al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!searchInput?.contains(e.target) && !searchResults?.contains(e.target)) {
+                searchResults?.classList.add('hidden');
+            }
+        });
+
+        // Event listeners para cambio de vista
         document.getElementById('btn-2d')?.addEventListener('click', () => switchView('2d'));
         document.getElementById('btn-3d')?.addEventListener('click', () => switchView('3d'));
     });
@@ -85,5 +202,24 @@
         background: #3b82f6;
         color: white;
         border-color: #3b82f6;
+    }
+
+    #search-results {
+        animation: slideDown 0.2s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .search-item {
+        transition: background-color 0.15s ease;
     }
 </style>

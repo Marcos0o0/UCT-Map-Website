@@ -336,11 +336,15 @@ document.addEventListener('DOMContentLoaded', function() {
     return mapCoords;
 }
 
-
+if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    console.error('❌ HTTPS requerido. URL actual:', location.href);
+    alert('Este sitio requiere HTTPS para geolocalización');
+}
     // Obtener ubicación del usuario
     function getUserLocation() {
     if (!navigator.geolocation) {
-        alert('❌ Tu navegador no soporta geolocalización');
+        alert('Tu navegador no soporta geolocalización');
+        console.log('getUserLocation() ejecutándose...');
         return;
     }
 
@@ -992,6 +996,8 @@ function handleLocationError(error, locationBtn) {
     img.onload = function() {
         width = this.naturalWidth;
         height = this.naturalHeight;
+
+        console.log(`📐 Mapa cargado: ${width}x${height}px`);
         
         mainEntrance.pos = [height * 0.200, width * 0.210];
         pathNetwork.nodes['entrada'] = mainEntrance.pos;

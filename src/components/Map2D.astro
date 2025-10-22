@@ -143,6 +143,48 @@
     z-index: 1000;
     /* ... resto igual */
 }
+
+
+/* Estilos para los checkboxes personalizados */
+.custom-checkbox input:checked ~ .checkmark {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+    border-color: #3b82f6;
+}
+
+/* Scrollbar personalizada */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
     </style>
 
 <!-- VERSIÓN MÓVIL -->
@@ -174,7 +216,7 @@
                         class="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
                     />
                     <button id="clear-search-mobile" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                        ✕
+                        X
                     </button>
                 </div>
                 <div id="search-results-mobile" class="hidden mt-2 max-h-60 overflow-y-auto bg-white border-2 border-gray-200 rounded-lg"></div>
@@ -268,120 +310,130 @@
 <div class="hidden lg:block">
     <div class="max-w-[90rem] mx-auto pt-20">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- Panel Lateral Desktop -->
-            <div class="lg:col-span-1 space-y-4 max-h-screen overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <!-- Barra de búsqueda -->
-                <div class="bg-white rounded-xl shadow-sm p-4">
-                    <div class="relative">
-                        <input 
-                            type="text" 
-                            id="search-input-desktop" 
-                            placeholder="Buscar lugar..." 
-                            class="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
-                        />
-                        <button id="clear-search-desktop" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                            ✕
-                        </button>
-                    </div>
-                    <div id="search-results-desktop" class="hidden mt-2 max-h-60 overflow-y-auto bg-white border-2 border-gray-200 rounded-lg"></div>
-                </div>
-                <!-- Ubicación -->
-                <div class="bg-white rounded-xl shadow-sm p-4">
-                    <button id="get-location-btn-desktop" title="Obtener mi ubicación" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Mi Ubicación
-                    </button>
-                </div>
+            <!-- Panel Lateral Desktop Optimizado -->
+<div class="lg:col-span-1 space-y-3 max-h-screen overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+    <!-- Barra de búsqueda + Ubicación combinadas -->
+    <div class="bg-white rounded-xl shadow-sm p-4">
+        <div class="relative mb-3">
+            <input 
+                type="text" 
+                id="search-input-desktop" 
+                placeholder="Buscar lugar..." 
+                class="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+            />
+            <button id="clear-search-desktop" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                ✕
+            </button>
+        </div>
+        <div id="search-results-desktop" class="hidden mb-3 max-h-48 overflow-y-auto bg-white border-2 border-gray-200 rounded-lg"></div>
+        
+        <button id="get-location-btn-desktop" title="Obtener mi ubicación" class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2 text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Mi Ubicación
+        </button>
+    </div>
 
-                <!-- Rutas Desktop -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="font-bold text-lg mb-4">¿Dónde ir?</h3>
-                    <div class="space-y-3">
-                        <select id="route-from-desktop" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
-                            <option value="">Entrada Principal</option>
-                        </select>
-                        <select id="route-to-desktop" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
-                            <option value="">Seleccionar destino</option>
-                        </select>
-                        <button id="calculate-route-desktop" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-                            Calcular Ruta
-                        </button>
-                        <div id="route-info-desktop" class="hidden p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <p id="route-distance-desktop" class="text-sm font-medium text-blue-900"></p>
-                            <p id="route-time-desktop" class="text-sm text-blue-700"></p>
-                            <button id="clear-route-desktop" class="mt-2 text-xs text-red-600 font-medium hover:text-red-700">Limpiar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Filtros Desktop -->
-                <div class="bg-gray-50 rounded-xl shadow-sm p-6">
-                    <h3 class="font-bold text-lg mb-4">Filtros</h3>
-                    <div class="space-y-2">
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="edificio" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Edificios Académicos <span class="text-gray-400">(10)</span></span>                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="libreria" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Bibliotecas</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="comer" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Cafeterías</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="baños" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Baños</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="estacionamiento" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Estacionamientos</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="bicicletas" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Est. Bicicletas</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="gym" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Gimnasio</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="calistenia" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Calistenia</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="impresion" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Impresiones</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="daas" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">DAAS</span>
-                        </label>
-                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
-                            <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="tesoreria" checked>
-                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span class="label-text ml-2.5 text-gray-700 text-sm">Tesorería</span>
-                        </label>
-                    </div>
-                </div>
+    <!-- Rutas Desktop - Más compacto -->
+    <div class="bg-white rounded-xl shadow-sm p-4">
+        <h3 class="font-bold text-base mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+            </svg>
+            ¿Dónde ir?
+        </h3>
+        <div class="space-y-2">
+            <select id="route-from-desktop" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
+                <option value="">Entrada Principal</option>
+            </select>
+            <select id="route-to-desktop" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm">
+                <option value="">Seleccionar destino</option>
+            </select>
+            <button id="calculate-route-desktop" class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+                Calcular Ruta
+            </button>
+            <div id="route-info-desktop" class="hidden p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p id="route-distance-desktop" class="text-sm font-medium text-blue-900"></p>
+                <p id="route-time-desktop" class="text-xs text-blue-700"></p>
+                <button id="clear-route-desktop" class="mt-2 text-xs text-red-600 font-medium hover:text-red-700">Limpiar ruta</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Filtros Desktop - Grid de 2 columnas -->
+    <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl shadow-sm p-4">
+        <h3 class="font-bold text-base mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+            </svg>
+            Filtros
+        </h3>
+        <div class="grid grid-cols-2 gap-x-2 gap-y-1.5">
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="edificio" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Edificios <span class="text-gray-400 text-xs">(10)</span></span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="libreria" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Bibliotecas</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="comer" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Cafeterías</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="baños" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Baños</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="estacionamiento" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Estacionam.</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="bicicletas" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Bicicletas</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="gym" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Gimnasio</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="calistenia" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Calistenia</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="impresion" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Impresiones</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="daas" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">DAAS</span>
+            </label>
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
+                <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="tesoreria" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span class="label-text ml-2 text-gray-700 text-xs font-medium">Tesorería</span>
+            </label>
+        </div>
+    </div>
+</div>
+
 
             <!-- Mapa Desktop -->
             <div class="lg:col-span-3">
-                <div class="w-full rounded-xl relative h-[600px] bg-gray-100">
+                <div class="w-full rounded-xl relative h-[640px] bg-gray-100">
                     <div id="enhanced-map" class="w-full h-full rounded-xl"></div>
                     
                     <!-- Controles de zoom desktop -->

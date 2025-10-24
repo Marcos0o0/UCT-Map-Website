@@ -104,7 +104,9 @@
     }
 
 
-        .mobile-panel {
+       /* Reemplaza los estilos .mobile-panel en tu <style> con esto: */
+
+    .mobile-panel {
         position: fixed;
         bottom: 0;
         left: 0;
@@ -116,10 +118,70 @@
         background: white;
         border-radius: 20px 20px 0 0;
         box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+        /* Importante: permitir que el contenido sea scrolleable */
+        display: flex;
+        flex-direction: column;
     }
 
     .mobile-panel.expanded {
         transform: translateY(0) !important;
+    }
+
+    .mobile-panel-handle {
+        width: 40px;
+        height: 4px;
+        background: #d1d5db;
+        border-radius: 9999px;
+        margin: 12px auto;
+        cursor: grab;
+        transition: background-color 0.2s;
+        flex-shrink: 0; /* No se comprime */
+        /* Aumentar área táctil */
+        position: relative;
+    }
+
+    .mobile-panel-handle::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        left: -20px;
+        right: -20px;
+        bottom: -12px;
+    }
+
+    .mobile-panel-handle:hover {
+        background: #9ca3af;
+    }
+
+    .mobile-panel-handle:active {
+        cursor: grabbing;
+        background: #6b7280;
+    }
+
+    /* Contenedor scrolleable */
+    .mobile-panel > div:last-child {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    /* Prevenir scroll cuando el panel está colapsado */
+    .mobile-panel:not(.expanded) > div:last-child {
+        overflow: hidden;
+    }
+
+    /* Mejorar el scroll en iOS */
+    .mobile-panel > div:last-child {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Asegurar que el contenido del panel no interfiera con el drag */
+    .mobile-panel.dragging {
+        pointer-events: none;
+    }
+
+    .mobile-panel.dragging .mobile-panel-handle {
+        pointer-events: all;
     }
 
 @media (max-width: 1023px) {
@@ -185,7 +247,17 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
-    </style>
+</style>
+
+<!-- Título de la sección -->
+    <div class="text-center animate-[slideDown_0.6s_ease-out_0.1s_both] sm:mb-4">
+      <h2 class="text-3xl lg:text-5xl font-black mb-4 gradient-text animation-gradient">
+        Tour Virtual 360°
+      </h2>
+      <p class="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto font-medium leading-relaxed">
+        Recorre el Campus San Francisco desde cualquier lugar
+      </p>
+    </div>
 
 <!-- VERSIÓN MÓVIL -->
 <div class="lg:hidden">
@@ -196,6 +268,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
         </svg>
     </button>
+
 
     <!-- Panel deslizable -->
     <div id="mobile-panel" class="mobile-panel fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] z-[500] max-h-[85vh] overflow-hidden">
@@ -354,11 +427,44 @@
             <button id="calculate-route-desktop" class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
                 Calcular Ruta
             </button>
-            <div id="route-info-desktop" class="hidden p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <p id="route-distance-desktop" class="text-sm font-medium text-blue-900"></p>
-                <p id="route-time-desktop" class="text-xs text-blue-700"></p>
-                <button id="clear-route-desktop" class="mt-2 text-xs text-red-600 font-medium hover:text-red-700">Limpiar ruta</button>
-            </div>
+            <div id="route-info-desktop" class="hidden">
+  <div class="bg-white rounded-2xl shadow-xl p-4 border border-gray-200">
+    <!-- Header con icono -->
+    <div class="flex items-center gap-2 mb-3">
+      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+        </svg>
+      </div>
+      <h3 class="text-gray-800 font-bold text-sm">Ruta calculada</h3>
+    </div>
+    
+    <!-- Información de la ruta -->
+    <div class="space-y-2 mb-3">
+      <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+        </svg>
+        <p id="route-distance-desktop" class="text-gray-900 font-semibold text-base"></p>
+      </div>
+      
+      <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p id="route-time-desktop" class="text-gray-700 text-sm"></p>
+      </div>
+    </div>
+    
+    <!-- Botón limpiar -->
+    <button id="clear-route-desktop" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-medium text-sm py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 group border border-red-200">
+      <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+      Limpiar ruta
+    </button>
+  </div>
+</div>
         </div>
     </div>
 
@@ -1708,72 +1814,142 @@ map.on('click', function(e) {
         });
 
         // Panel móvil deslizable
-        const mobilePanel = document.getElementById('mobile-panel');
         const panelHandle = mobilePanel?.querySelector('.mobile-panel-handle');
-        
+
         if (mobilePanel && panelHandle) {
             let startY = 0;
-            let currentY = 0;
+            let currentTranslate = 0;
             let isDragging = false;
-
-            panelHandle.addEventListener('touchstart', (e) => {
+            let startTime = 0;
+            
+            // Altura del panel cuando está colapsado (solo se ve el handle)
+            const collapsedHeight = 80;
+            const panelHeight = mobilePanel.offsetHeight;
+            
+            function handleTouchStart(e) {
                 startY = e.touches[0].clientY;
+                startTime = Date.now();
                 isDragging = true;
-            });
-
-            panelHandle.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                currentY = e.touches[0].clientY;
-                const diff = currentY - startY;
                 
-                if (diff > 0) {
+                // Obtener la posición actual del panel
+                const transform = window.getComputedStyle(mobilePanel).transform;
+                if (transform !== 'none') {
+                    const matrix = new DOMContentCSSMatrix(transform);
+                    currentTranslate = matrix.m42; // translateY
+                } else {
+                    currentTranslate = mobilePanel.classList.contains('expanded') ? 0 : panelHeight - collapsedHeight;
+                }
+                
+                // Remover la transición mientras se arrastra
+                mobilePanel.style.transition = 'none';
+            }
+            
+            function handleTouchMove(e) {
+                if (!isDragging) return;
+                
+                const currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+                
+                // Calcular nueva posición
+                let newTranslate = currentTranslate + deltaY;
+                
+                // Limitar el rango de movimiento
+                const maxTranslate = panelHeight - collapsedHeight; // Posición colapsada
+                const minTranslate = 0; // Posición expandida
+                
+                // Aplicar resistencia cuando se intenta arrastrar más allá de los límites
+                if (newTranslate < minTranslate) {
+                    newTranslate = minTranslate - (minTranslate - newTranslate) * 0.3;
+                } else if (newTranslate > maxTranslate) {
+                    newTranslate = maxTranslate + (newTranslate - maxTranslate) * 0.3;
+                }
+                
+                // Aplicar la transformación
+                mobilePanel.style.transform = `translateY(${newTranslate}px)`;
+                
+                // Prevenir scroll del body cuando se arrastra hacia arriba
+                if (deltaY < 0 || !mobilePanel.classList.contains('expanded')) {
                     e.preventDefault();
                 }
-            });
-
-            panelHandle.addEventListener('touchend', () => {
+            }
+            
+            function handleTouchEnd(e) {
                 if (!isDragging) return;
+                
                 isDragging = false;
+                const endTime = Date.now();
+                const timeDiff = endTime - startTime;
                 
-                const diff = currentY - startY;
+                // Restaurar la transición
+                mobilePanel.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                 
-                if (diff > 100) {
-                    mobilePanel.classList.remove('expanded');
-                } else if (diff < -50) {
-                    mobilePanel.classList.add('expanded');
+                // Obtener la posición final
+                const transform = window.getComputedStyle(mobilePanel).transform;
+                let finalTranslate = 0;
+                
+                if (transform !== 'none') {
+                    const matrix = new DOMContentCSSMatrix(transform);
+                    finalTranslate = matrix.m42;
                 }
                 
-                currentY = 0;
-                startY = 0;
-            });
-
+                const deltaY = finalTranslate - currentTranslate;
+                const velocity = Math.abs(deltaY) / timeDiff; // pixels por ms
+                
+                const threshold = (panelHeight - collapsedHeight) / 2;
+                
+                // Decisión basada en velocidad o posición
+                if (velocity > 0.5) {
+                    // Swipe rápido
+                    if (deltaY > 0) {
+                        // Swipe hacia abajo - colapsar
+                        mobilePanel.classList.remove('expanded');
+                        mobilePanel.style.transform = `translateY(calc(100% - ${collapsedHeight}px))`;
+                    } else {
+                        // Swipe hacia arriba - expandir
+                        mobilePanel.classList.add('expanded');
+                        mobilePanel.style.transform = 'translateY(0)';
+                    }
+                } else {
+                    // Decisión basada en posición
+                    if (finalTranslate > threshold) {
+                        // Más cerca de colapsado
+                        mobilePanel.classList.remove('expanded');
+                        mobilePanel.style.transform = `translateY(calc(100% - ${collapsedHeight}px))`;
+                    } else {
+                        // Más cerca de expandido
+                        mobilePanel.classList.add('expanded');
+                        mobilePanel.style.transform = 'translateY(0)';
+                    }
+                }
+                
+                // Limpiar inline styles después de la transición
+                setTimeout(() => {
+                    if (!isDragging) {
+                        mobilePanel.style.transition = '';
+                        mobilePanel.style.transform = '';
+                    }
+                }, 300);
+            }
+            
+            // Eventos en el handle
+            panelHandle.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd);
+            
+            // También permitir click en el handle
             panelHandle.addEventListener('click', () => {
-                mobilePanel.classList.toggle('expanded');
+                if (!isDragging) {
+                    mobilePanel.classList.toggle('expanded');
+                }
+            });
+            
+            // Cleanup
+            window.addEventListener('beforeunload', () => {
+                panelHandle.removeEventListener('touchstart', handleTouchStart);
+                document.removeEventListener('touchmove', handleTouchMove);
+                document.removeEventListener('touchend', handleTouchEnd);
             });
         }
-
-        // Prevenir doble tap zoom en iOS
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (e) => {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
-
-        // Ajustar mapa en cambio de orientación
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                if (map) map.invalidateSize();
-            }, 300);
-        });
-
-        window.addEventListener('resize', function() {
-            if (map) {
-                setTimeout(() => map.invalidateSize(), 100);
-            }
-        });
     };
 
     img.onerror = function() {

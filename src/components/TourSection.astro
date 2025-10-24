@@ -1,139 +1,93 @@
 ---
-// TourSection.astro
+// TourSection.astro - Con menú lateral funcional en fullscreen
 ---
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
 
-<div class="max-w-7xl mx-auto pt-24 lg:pt-44 px-4 lg:px-0">
-    <div class="rounded-xl shadow-lg overflow-hidden relative">
-        <!-- Controles superiores -->
-        <div class="absolute top-2 left-10 lg:top-4 lg:left-10 flex gap-1 lg:gap-2 z-[100]">
-            <button id="prev-scene" class="bg-white/95 backdrop-blur-sm px-2 py-1.5 lg:px-4 lg:py-2 rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-1 lg:gap-2 hover:bg-white">
-                <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                <span class="font-medium text-xs lg:text-base hidden sm:inline">Anterior</span>
-            </button>
-            <button id="next-scene" class="bg-white/95 backdrop-blur-sm px-2 py-1.5 lg:px-4 lg:py-2 rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-1 lg:gap-2 hover:bg-white">
-                <span class="font-medium text-xs lg:text-base hidden sm:inline">Siguiente</span>
-                <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </button>
-        </div>
-
-
-        <!-- Info de escena actual -->
-        <div class="absolute top-2 right-2 lg:top-4 lg:right-4 z-[100]">
-            <div class="bg-white/95 backdrop-blur-sm px-2 py-1.5 lg:px-4 lg:py-2 rounded-lg shadow-lg">
-                <p id="scene-title" class="font-semibold text-xs lg:text-base text-gray-800">Entrada principal</p>
-            </div>
-        </div>
-
-
-        <!-- Visor Pannellum -->
-        <div id="panorama" data-lenis-prevent class="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]" style="min-height: 300px;"></div> 
+<div class="relative py-12 lg:py-20 overflow-visible">
+  <div class="relative max-w-7xl mx-auto px-4 lg:px-6">
+    <!-- Título de la sección -->
+    <div class="text-center mb-8 lg:mb-12 animate-[slideDown_0.6s_ease-out_0.1s_both]">
+      <h2 class="text-3xl lg:text-5xl font-black mb-4 gradient-text animation-gradient">
+        Tour Virtual 360°
+      </h2>
+      <p class="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto font-medium leading-relaxed">
+        Recorre el Campus San Francisco desde cualquier lugar
+      </p>
     </div>
 
-    <!-- Miniaturas de escenas -->
-        <div class="mt-4 lg:mt-6 bg-gray-50 rounded-xl shadow-sm p-3 lg:p-6">
-    <h3 class="font-bold text-base lg:text-lg mb-3 lg:mb-4 text-gray-800">Atajos rápidos</h3>
-    <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-9 gap-2 lg:gap-3">
+    <!-- Visor panorámico -->
+    <div class="rounded-3xl shadow-2xl overflow-hidden relative bg-black animate-[slideDown_0.6s_ease-out_0.2s_both]">
+      <!-- Controles superiores (se mantienen en fullscreen) -->
+      <div id="top-controls" class="absolute top-3 left-10 lg:left-12 flex gap-1.5 z-[9999]">
+        <button id="prev-scene" class="bg-white/95 backdrop-blur-sm px-2.5 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-1.5 font-semibold text-gray-700 hover:bg-white border border-gray-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          <span class="hidden sm:inline text-xs">Anterior</span>
+        </button>
+        <button id="next-scene" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-2.5 py-2 rounded-xl font-semibold flex items-center gap-1.5 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+          <span class="hidden sm:inline text-xs">Siguiente</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
         
-        <button class="scene-thumb group" data-scene="entrada">
-            <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-blue-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Entrada</p>
+        <!-- Botón para abrir menú lateral -->
+        <button id="toggle-menu" class="bg-white/95 backdrop-blur-sm px-2.5 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 font-semibold text-gray-700 hover:bg-white border border-gray-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
         </button>
+      </div>
 
-        <button class="scene-thumb group" data-scene="ext_02">
-            <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-green-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 02</p>
-        </button>
+      <!-- Info de escena actual (se mantiene en fullscreen) -->
+      <div id="scene-info" class="absolute top-3 right-3 lg:right-4 z-[9999]">
+        <div class="bg-white/95 backdrop-blur-sm px-3.5 py-2 rounded-xl shadow-lg border border-gray-200">
+          <p id="scene-title" class="font-semibold text-xs lg:text-sm text-gray-800">Entrada principal</p>
+        </div>
+      </div>
 
-        <button class="scene-thumb group" data-scene="ext_03">
-            <div class="bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-orange-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 03</p>
-        </button>
+      <!-- Menú lateral de escenas (se mantiene en fullscreen) -->
+      <div id="hotspots-menu" class="hidden absolute left-4 top-24 z-[9999] bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-w-xs">
+        <div class="p-4 bg-gradient-to-r from-blue-500 to-blue-600">
+          <h3 class="text-white font-bold text-lg">Escenas del Tour</h3>
+        </div>
+        <div class="max-h-[400px] overflow-y-auto p-2">
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="entrada">
+            📍 Entrada principal
+          </button>
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_02">
+            📍 Exterior 02
+          </button>
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_03">
+            📍 Exterior 03
+          </button>
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_04">
+            📍 Exterior 04
+          </button>
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_05">
+            📍 Exterior 05
+          </button>
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_06">
+            📍 Exterior 06
+          </button>
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_07">
+            📍 Exterior 07
+          </button>
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_08">
+            📍 Exterior 08
+          </button>
+          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700" data-scene="ext_09">
+            📍 Exterior 09
+          </button>
+        </div>
+      </div>
 
-        <button class="scene-thumb group" data-scene="ext_04">
-            <div class="bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-purple-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 04</p>
-        </button>
-
-        <button class="scene-thumb group" data-scene="ext_05">
-            <div class="bg-gradient-to-br from-pink-400 to-pink-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-pink-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 05</p>
-        </button>
-
-        <button class="scene-thumb group" data-scene="ext_06">
-            <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-indigo-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 06</p>
-        </button>
-
-        <button class="scene-thumb group" data-scene="ext_07">
-            <div class="bg-gradient-to-br from-red-400 to-red-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-red-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 07</p>
-        </button>
-
-        <button class="scene-thumb group" data-scene="ext_08">
-            <div class="bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-teal-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 08</p>
-        </button>
-
-        <button class="scene-thumb group" data-scene="ext_09">
-            <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-yellow-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 09</p>
-        </button>
-
-        <button class="scene-thumb group" data-scene="ext_09">
-            <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg p-2 group-hover:ring-2 group-hover:ring-yellow-500 transition-all group-hover:scale-105">
-                <svg class="w-6 h-6 mx-auto text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                </svg>
-            </div>
-            <p class="text-[10px] lg:text-xs font-medium text-gray-700 text-center mt-1">Ext. 09</p>
-        </button>
-
+      <!-- Visor Pannellum -->
+      <div id="panorama" data-lenis-prevent class="w-full h-[400px] sm:h-[500px] lg:h-[600px]" style="min-height: 600px;"></div>
     </div>
-</div>
-    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
@@ -166,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         scenes: {
             entrada: {
-                title: "Entrada principal",
                 type: "equirectangular",
                 panorama: "./360_img/Ext_01.jpg",
                 pitch: 0,
@@ -307,12 +260,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Actualizar título y contador
+    // Función para mover controles al contenedor de Pannellum en fullscreen
+    function moveControlsToFullscreen() {
+        const container = document.querySelector('.pnlm-container');
+        const topControls = document.getElementById('top-controls');
+        const sceneInfo = document.getElementById('scene-info');
+        const menu = document.getElementById('hotspots-menu');
+        
+        if (container && topControls && sceneInfo && menu) {
+            container.appendChild(topControls);
+            container.appendChild(sceneInfo);
+            container.appendChild(menu);
+        }
+    }
+
+    // Función para restaurar controles a su posición original
+    function restoreControlsPosition() {
+        const panoramaParent = document.getElementById('panorama').parentElement;
+        const topControls = document.getElementById('top-controls');
+        const sceneInfo = document.getElementById('scene-info');
+        const menu = document.getElementById('hotspots-menu');
+        
+        if (panoramaParent && topControls && sceneInfo && menu) {
+            panoramaParent.insertBefore(topControls, document.getElementById('panorama'));
+            panoramaParent.insertBefore(sceneInfo, document.getElementById('panorama'));
+            panoramaParent.insertBefore(menu, document.getElementById('panorama'));
+        }
+    }
+
+    // Detectar cambios de fullscreen
+    document.addEventListener('fullscreenchange', function() {
+        if (document.fullscreenElement) {
+            moveControlsToFullscreen();
+        } else {
+            restoreControlsPosition();
+        }
+    });
+
+    // Actualizar título
     function updateSceneInfo(sceneId) {
         currentSceneIndex = sceneOrder.indexOf(sceneId);
-        document.getElementById('scene-title').textContent = sceneTitles[sceneId];
-        document.getElementById('current-scene-number').textContent = currentSceneIndex + 1;
-        document.getElementById('total-scenes').textContent = sceneOrder.length;
+        const title = document.getElementById('scene-title');
+        if (title) {
+            title.textContent = sceneTitles[sceneId];
+        }
     }
 
     // Navegación anterior/siguiente
@@ -332,21 +323,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Miniaturas
-    document.querySelectorAll('.scene-thumb').forEach(button => {
+    // Toggle menú de hotspots
+    const menuBtn = document.getElementById('toggle-menu');
+    const menu = document.getElementById('hotspots-menu');
+    let menuOpen = false;
+
+    menuBtn.addEventListener('click', () => {
+        menuOpen = !menuOpen;
+        if (menuOpen) {
+            menu.classList.remove('hidden');
+            menu.classList.add('animate-slideInLeft');
+        } else {
+            menu.classList.add('hidden');
+            menu.classList.remove('animate-slideInLeft');
+        }
+    });
+
+    // Navegación desde el menú
+    document.querySelectorAll('.hotspot-item').forEach(button => {
         button.addEventListener('click', () => {
             const sceneId = button.dataset.scene;
             viewer.loadScene(sceneId);
             updateSceneInfo(sceneId);
+            // Cerrar menú en móviles
+            if (window.innerWidth < 768) {
+                menuOpen = false;
+                menu.classList.add('hidden');
+            }
         });
-    });
-
-    // Pantalla completa
-    document.getElementById('fullscreen-360').addEventListener('click', () => {
-        const panoramaDiv = document.getElementById('panorama');
-        if (panoramaDiv.requestFullscreen) {
-            panoramaDiv.requestFullscreen();
-        }
     });
 
     // Escuchar cambios de escena de Pannellum
@@ -360,16 +364,62 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slidePattern {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(80px);
+        }
+    }
+
+    .gradient-text {
+        background: linear-gradient(
+            to right,
+            #1455ff 10%,
+            #4e80ff 30%,
+            #4784fd 60%,
+            #2c71fc 80%  
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-fill-color: transparent;
+        background-size: 500% auto;
+        animation: textShine 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes textShine {
+        0% {
+            background-position: 0% 50%;
+        }
+        100% {
+            background-position: 100% 50%;
+        }
+    }
+
     /* Estilos para el visor */
     #panorama {
         background: #000;
         position: relative;
         width: 100%;
+        border-radius: 1rem;
     }
 
     /* Mejorar controles de Pannellum */
     .pnlm-container {
-        border-radius: 12px;
+        border-radius: 1rem;
         position: relative !important;
         width: 100% !important;
         height: 100% !important;
@@ -378,14 +428,61 @@ document.addEventListener('DOMContentLoaded', function() {
     .pnlm-render-container {
         width: 100% !important;
         height: 100% !important;
+        border-radius: 1rem;
     }
 
-    /* Animación para miniaturas */
-    .scene-thumb {
-        transition: transform 0.2s;
+    /* Asegurar que los controles se vean en fullscreen */
+    #top-controls,
+    #scene-info,
+    #hotspots-menu {
+        position: absolute !important;
     }
 
-    .scene-thumb:hover {
-        transform: scale(1.05);
+    /* En fullscreen, mantener z-index alto */
+    .pnlm-container:-webkit-full-screen #top-controls,
+    .pnlm-container:-webkit-full-screen #scene-info,
+    .pnlm-container:-webkit-full-screen #hotspots-menu,
+    .pnlm-container:-moz-full-screen #top-controls,
+    .pnlm-container:-moz-full-screen #scene-info,
+    .pnlm-container:-moz-full-screen #hotspots-menu,
+    .pnlm-container:fullscreen #top-controls,
+    .pnlm-container:fullscreen #scene-info,
+    .pnlm-container:fullscreen #hotspots-menu {
+        z-index: 9999 !important;
+    }
+
+    /* Animación para menú lateral */
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .animate-slideInLeft {
+        animation: slideInLeft 0.3s ease-out;
+    }
+
+    /* Scroll personalizado para el menú */
+    #hotspots-menu::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #hotspots-menu::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+    }
+
+    #hotspots-menu::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.5);
+        border-radius: 10px;
+    }
+
+    #hotspots-menu::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, 0.7);
     }
 </style>

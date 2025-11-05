@@ -95,7 +95,7 @@ const isActive = (path: string) => {
         Mapa
       </a>
       <a 
-        href="#" 
+        href="/information" 
         class={`block py-3 px-4 rounded-lg text-base ${
           isActive('/information') 
             ? 'text-blue-600 font-semibold bg-blue-50' 
@@ -155,4 +155,34 @@ const isActive = (path: string) => {
       }
     });
   }
+
+  // Scroll suave con offset para el enlace "Mapa"
+document.addEventListener('DOMContentLoaded', () => {
+  const navbar = document.querySelector('header'); // tu navbar fijo
+  const links = document.querySelectorAll('a[href^="/#"], a[href^="#"]'); // enlaces con anclas
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      if (!href || href === '#' || href === '/#') return;
+
+      const id = href.replace('/', '').replace('#', '');
+      const target = document.getElementById(id);
+
+      if (target) {
+        e.preventDefault();
+
+        const headerHeight = (navbar?.offsetHeight || 0) + 20;
+
+        const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+});
+
 </script>

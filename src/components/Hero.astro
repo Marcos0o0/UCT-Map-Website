@@ -220,16 +220,23 @@
         document.getElementById('btn-3d')?.addEventListener('click', () => switchView('3d'));
     });
 
-    // Event listener para botón de scroll
-        document.getElementById('scroll-down-btn')?.addEventListener('click', () => {
-            const mapSection = document.getElementById('view-2d') || document.querySelector('[id^="view-"]');
-            if (mapSection) {
-                mapSection.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                });
-            }
-        });
+    document.getElementById('scroll-down-btn')?.addEventListener('click', () => {
+  const activeSection = document.querySelector('section[id^="view-"]:not(.hidden)');
+  
+  if (activeSection) {
+    const headerOffset = 100; // ajusta este valor según la altura de tu navbar (por ejemplo 80 o 120 px)
+    const elementPosition = activeSection.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
+});
+
+
+
 </script>
 
 <style>

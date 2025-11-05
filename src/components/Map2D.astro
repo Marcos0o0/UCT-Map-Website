@@ -341,10 +341,19 @@
             </div>
 
             <!-- Filtros -->
-            <details class="bg-gray-50 rounded-2xl overflow-hidden">
-                <summary class="px-4 py-3 font-bold cursor-pointer list-none hover:bg-gray-100 text-gray-900">Filtros</summary>
-                <div class="px-4 pb-4 space-y-2">
-                    <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
+            <details class="bg-gray-50 rounded-2xl overflow-hidden" open>
+                    <summary class="px-4 py-3 font-bold cursor-pointer list-none hover:bg-gray-100 text-gray-900">Filtros</summary>
+                    <div class="px-4 pb-4 space-y-2">
+                        <!-- Checkbox Seleccionar Todo -->
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-2 rounded-lg transition-colors">
+                            <input type="checkbox" id="select-all-mobile" class="absolute opacity-0 cursor-pointer" checked>
+                            <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
+                            <span id="select-all-text-mobile" class="label-text ml-2.5 text-gray-900 text-sm font-bold">Deseleccionar Todo</span>
+                        </label>
+
+                        <div class="border-t border-gray-200 my-2"></div>
+
+                        <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-lg transition-colors hover:bg-gray-100">
                         <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="edificio" checked>
                         <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
                         <span class="label-text ml-2.5 text-gray-700 text-sm">Edificios Académicos <span class="text-gray-400">(10)</span></span>                    </label>
@@ -490,18 +499,28 @@
     </button>
   </div>
 </div>
-        </div>
-    </div>
+</div>
+</div>
 
-    <!-- Filtros Desktop - Grid de 2 columnas -->
-    <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl shadow-sm p-4">
-        <h3 class="font-bold text-base mb-3 flex items-center gap-2">
-            <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-            </svg>
-            Filtros
-        </h3>
-        <div class="grid grid-cols-2 gap-x-2 gap-y-1.5">
+        <!-- Filtros Desktop - Grid de 2 columnas -->
+        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl shadow-sm p-4">
+            <h3 class="font-bold text-base mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                Filtros
+            </h3>
+
+            <!-- Checkbox Seleccionar Todo -->
+            <label class="custom-checkbox flex items-center cursor-pointer select-none p-2 rounded-md transition-colors mb-3">
+                <input type="checkbox" id="select-all-desktop" class="absolute opacity-0 cursor-pointer" checked>
+                <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
+                <span id="select-all-text-desktop" class="label-text ml-2 text-gray-900 text-xs font-bold">Deseleccionar Todo</span>
+            </label>
+
+            <div class="border-t border-gray-300 mb-3"></div>
+
+            <div class="grid grid-cols-2 gap-x-2 gap-y-1.5">
             <label class="custom-checkbox flex items-center cursor-pointer select-none p-1.5 rounded-md transition-colors hover:bg-white/70">
                 <input type="checkbox" class="marker-filter absolute opacity-0 cursor-pointer" data-type="edificio" checked>
                 <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
@@ -1488,6 +1507,9 @@ leafletMarker.on('click', function() {
         </div>
     ` : '';
 
+    const statusBadge = marker.schedule ? getStatusBadge(marker.schedule) : '';
+    const todaySchedule = getTodaySchedule(marker.schedule);
+
     const updatedPopupContent = `
         <div class="p-2 min-w-[280px]">
             <div class="flex justify-between items-start mb-2">
@@ -1557,6 +1579,10 @@ leafletMarker.on('click', function() {
         </div>
     `;
 
+    // IMPORTANTE: Unbind cualquier popup anterior antes de crear uno nuevo
+    this.unbindPopup();
+    
+    // Crear y abrir el nuevo popup
     this.bindPopup(updatedPopupContent, {
         autoPan: true,
         autoPanPadding: [10, 10],
@@ -1674,72 +1700,137 @@ leafletMarker.on('click', function() {
         });
 
         // Usar delegación de eventos para los botones del popup
-map.on('click', function(e) {
-    // Solo procesar si es un popup
-    if (!e.originalEvent) return;
-    
-    const target = e.originalEvent.target;
-    
-    // Botón "Cómo llegar"
-    if (target.closest('.route-to-here')) {
-        const btn = target.closest('.route-to-here');
-        const locationName = btn.dataset.name;
-        
-        [routeToSelectMobile, routeToSelectDesktop].forEach(select => {
-            if (select) select.value = locationName;
-        });
-        
-        map.closePopup();
-        
-        const mobilePanel = document.getElementById('mobile-panel');
-        if (mobilePanel) {
-            mobilePanel.classList.add('expanded');
-        }
-    }
-    
-    // Botón "Compartir"
-    if (target.closest('.share-location')) {
-        const btn = target.closest('.share-location');
-        const locationName = btn.dataset.name;
-        const url = `${window.location.origin}${window.location.pathname}?location=${encodeURIComponent(locationName)}`;
-        const text = `Ubicación en Campus UCT: ${locationName}\n${url}`;
-        
-        if (navigator.share) {
-            navigator.share({
-                title: `Campus UCT - ${locationName}`,
-                text: text,
-                url: url
-            }).catch(() => {});
-        } else {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('¡Enlace copiado al portapapeles!');
-            }).catch(() => {
-                alert('No se pudo copiar el enlace');
-            });
-        }
-    }
-});
-
-        function updateMarkers() {
-            document.querySelectorAll('.marker-filter').forEach(cb => {
-                const type = cb.dataset.type;
-                const show = cb.checked;
-
-                markersByType[type]?.forEach(marker => {
-                    if (map) {
-                        if (show) {
-                            marker.addTo(map);
-                        } else {
-                            map.removeLayer(marker);
-                        }
+// Usar delegación de eventos para los botones del popup
+        map.on('popupopen', function(e) {
+            const popup = e.popup;
+            const content = popup.getElement();
+            
+            if (!content) return;
+            
+            // Botón "Cómo llegar"
+            const routeBtn = content.querySelector('.route-to-here');
+            if (routeBtn) {
+                routeBtn.addEventListener('click', function() {
+                    const locationName = this.dataset.name;
+                    
+                    [routeToSelectMobile, routeToSelectDesktop].forEach(select => {
+                        if (select) select.value = locationName;
+                    });
+                    
+                    map.closePopup();
+                    
+                    const mobilePanel = document.getElementById('mobile-panel');
+                    if (mobilePanel) {
+                        mobilePanel.classList.add('expanded');
                     }
                 });
-            });
-        }
-
-        document.querySelectorAll('.marker-filter').forEach(cb => {
-            cb.addEventListener('change', updateMarkers);
+            }
+            
+            // Botón "Compartir"
+            const shareBtn = content.querySelector('.share-location');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', function() {
+                    const locationName = this.dataset.name;
+                    const url = `${window.location.origin}${window.location.pathname}?location=${encodeURIComponent(locationName)}`;
+                    const text = `Ubicación en Campus UCT: ${locationName}\n${url}`;
+                    
+                    if (navigator.share) {
+                        navigator.share({
+                            title: `Campus UCT - ${locationName}`,
+                            text: text,
+                            url: url
+                        }).catch(() => {});
+                    } else {
+                        navigator.clipboard.writeText(text).then(() => {
+                            alert('¡Enlace copiado al portapapeles!');
+                        }).catch(() => {
+                            alert('No se pudo copiar el enlace');
+                        });
+                    }
+                });
+            }
         });
+
+        function updateMarkers() {
+    document.querySelectorAll('.marker-filter').forEach(cb => {
+        const type = cb.dataset.type;
+        const show = cb.checked;
+
+        markersByType[type]?.forEach(marker => {
+            if (map) {
+                if (show) {
+                    marker.addTo(map);
+                } else {
+                    map.removeLayer(marker);
+                }
+            }
+        });
+    });
+}
+
+// Event listeners para filtros individuales
+document.querySelectorAll('.marker-filter').forEach(cb => {
+    cb.addEventListener('change', () => {
+        updateMarkers();
+        updateSelectAllCheckbox();
+    });
+});
+
+// Función para actualizar el estado del checkbox "Seleccionar todo"
+function updateSelectAllCheckbox() {
+    const allFilters = document.querySelectorAll('.marker-filter');
+    const checkedFilters = document.querySelectorAll('.marker-filter:checked');
+    const allChecked = allFilters.length === checkedFilters.length;
+    
+    ['mobile', 'desktop'].forEach(device => {
+        const selectAll = document.getElementById(`select-all-${device}`);
+        const selectAllText = document.getElementById(`select-all-text-${device}`);
+        
+        if (selectAll) {
+            selectAll.checked = allChecked;
+        }
+        
+        if (selectAllText) {
+            selectAllText.textContent = allChecked ? 'Deseleccionar Todo' : 'Seleccionar Todo';
+        }
+    });
+}
+
+// Event listeners para "Seleccionar todo"
+['mobile', 'desktop'].forEach(device => {
+    const selectAll = document.getElementById(`select-all-${device}`);
+    const selectAllText = document.getElementById(`select-all-text-${device}`);
+    
+    if (selectAll && selectAllText) {
+        selectAll.addEventListener('change', function() {
+            const isChecked = this.checked;
+            
+            // Actualizar texto
+            selectAllText.textContent = isChecked ? 'Deseleccionar Todo' : 'Seleccionar Todo';
+            
+            // Cambiar el estado de todos los filtros
+            document.querySelectorAll('.marker-filter').forEach(cb => {
+                cb.checked = isChecked;
+            });
+            
+            // Sincronizar el otro checkbox "Seleccionar todo"
+            const otherDevice = device === 'mobile' ? 'desktop' : 'mobile';
+            const otherSelectAll = document.getElementById(`select-all-${otherDevice}`);
+            const otherSelectAllText = document.getElementById(`select-all-text-${otherDevice}`);
+            
+            if (otherSelectAll) {
+                otherSelectAll.checked = isChecked;
+            }
+            
+            if (otherSelectAllText) {
+                otherSelectAllText.textContent = isChecked ? 'Deseleccionar Todo' : 'Seleccionar Todo';
+            }
+            
+            // Actualizar marcadores
+            updateMarkers();
+        });
+    }
+});
 
         // Event listeners para calcular ruta
         const calculateBtns = [

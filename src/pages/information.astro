@@ -1,0 +1,285 @@
+---
+// Componente Información.astro
+import Layout from "../layouts/Layout.astro"
+import Footer from "../components/Footer.astro";
+---
+<Layout>
+<section class="py-16 lg:py-24 bg-gradient-to-b from-white to-gray-50 ">
+    <div class="container mx-auto px-6 pt-10">
+        
+        <!-- Header Principal -->
+        <div class="text-center animate-[slideDown_0.6s_ease-out_0.1s_both] sm:mb-4">
+          <h2 class="text-3xl lg:text-5xl font-black mb-4 gradient-text animation-gradient">
+            Sobre Nosotros
+          </h2>
+          <p class="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto font-medium leading-relaxed">
+            Somos un equipo de estudiantes apasionados por la tecnología y la innovación, trabajando para mejorar la experiencia universitaria
+          </p>
+        </div>
+
+        <!-- Misión y Visión -->
+        <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-10 pt-4">
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition">
+                <div class="w-16 h-16 bg-gradient-to-r from-[#1455ff] to-[#4e80ff] rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Nuestra Misión</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    Crear herramientas digitales innovadoras que faciliten la vida universitaria, proporcionando acceso rápido y eficiente a información del campus, servicios y recursos académicos para toda la comunidad UCT.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition">
+                <div class="w-16 h-16 bg-gradient-to-r from-[#4e80ff] to-[#4784fd] rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Nuestra Visión</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    Ser la plataforma líder de referencia para estudiantes de la UCT, integrando servicios digitales que mejoren la experiencia académica y promuevan una comunidad universitaria más conectada y colaborativa.
+                </p>
+            </div>
+        </div>
+
+        <!-- Equipo -->
+        <div class="max-w-6xl mx-auto pt-10">
+            <h2 class="text-3xl lg:text-4xl font-bold text-center mb-4 text-gray-900">
+                Nuestro Equipo
+            </h2>
+            <p class="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto font-medium leading-relaxed mb-10">
+                Estudiantes comprometidos con la innovación y el desarrollo tecnológico
+            </p>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Miembro 1 -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-2">
+                    <div class="w-24 h-24 bg-gradient-to-br from-[#1455ff] to-[#4e80ff] rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                        M
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Marcos Godoy</h3>
+                    <p class="text-blue-600 text-center mb-3 font-medium">Diseñador UX/UI y Fullstack Developer</p>
+                    <p class="text-gray-600 text-sm text-center mb-4">
+                        Apasionado por crear experiencias digitales intuitivas y funcionales que conecten a los usuarios con la tecnología de manera efectiva.
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <a href="#" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Miembro 2 -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-2">
+                    <div class="w-24 h-24 bg-gradient-to-br from-[#4e80ff] to-[#4784fd] rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                        M
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Martin Valdebenito</h3>
+                    <p class="text-blue-600 text-center mb-3 font-medium">Backend Developer</p>
+                    <p class="text-gray-600 text-sm text-center mb-4">
+                        Desarrollador del mapa interactivo y sistemas backend, enfocado en la eficiencia y escalabilidad de las aplicaciones
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <a href="#" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Miembro 3 -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-2">
+                    <div class="w-24 h-24 bg-gradient-to-br from-[#4784fd] to-[#2c71fc] rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                        V
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Vicente Ortiz</h3>
+                    <p class="text-blue-600 text-center mb-3 font-medium">Frontend Developer</p>
+                    <p class="text-gray-600 text-sm text-center mb-4">
+                        Apasionado por crear interfaces atractivas y funcionales que mejoren la experiencia del usuario
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <a href="#" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <!-- Miembro 4 -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-2">
+                    <div class="w-24 h-24 bg-gradient-to-br from-[#4784fd] to-[#2c71fc] rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                        A
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Alvaro Sandoval</h3>
+                    <p class="text-blue-600 text-center mb-3 font-medium">Fotografo y documentador</p>
+                    <p class="text-gray-600 text-sm text-center mb-4">
+                        Encargado de capturar imagenes 360 y documentar el progreso del proyecto
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <a href="#" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </a>
+                    </div>
+            </div>
+        </div>
+
+        
+
+    </div>
+    <!-- Tecnologías -->
+        <div class="max-w-6xl mx-auto pt-20">
+            <h2 class="text-3xl lg:text-4xl font-bold text-center mb-4 text-gray-900">
+                Tecnologías que Usamos
+            </h2>
+            <p class="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto font-medium leading-relaxed mb-10">
+                Herramientas modernas para crear experiencias excepcionales
+            </p>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition border border-gray-200">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-10 h-10 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0L1.75 3v9.74c0 7.59 6.27 10.84 10.25 11.26 3.98-.42 10.25-3.67 10.25-11.26V3L12 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-gray-900">Astro</h3>
+                    <p class="text-sm text-gray-600 mt-1">Framework Web</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition border border-gray-200">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-cyan-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-10 h-10 text-cyan-600" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-gray-900">Tailwind CSS</h3>
+                    <p class="text-sm text-gray-600 mt-1">Estilos</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition border border-gray-200">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-green-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd" d="M14.7898 18.9746C8.49749 21.4915 5.35132 22.75 3.55428 21.5288C3.1282 21.2393 2.76071 20.8718 2.47117 20.4457C1.25001 18.6487 2.50848 15.5025 5.02542 9.21017C5.56228 7.86802 5.8307 7.19695 6.29238 6.67048C6.41002 6.53633 6.53633 6.41002 6.67048 6.29238C7.19695 5.8307 7.86802 5.56228 9.21017 5.02542C15.5025 2.50848 18.6487 1.25001 20.4457 2.47117C20.8718 2.7607 21.2393 3.1282 21.5288 3.55428C22.75 5.35132 21.4915 8.49749 18.9746 14.7898C18.4377 16.132 18.1693 16.8031 17.7076 17.3295C17.59 17.4637 17.4637 17.59 17.3295 17.7076C16.8031 18.1693 16.132 18.4377 14.7898 18.9746Z" fill="#1c4a30"></path> <path d="M12 8.25C9.92893 8.25 8.25 9.92893 8.25 12C8.25 14.0711 9.92893 15.75 12 15.75C14.0711 15.75 15.75 14.0711 15.75 12C15.75 9.92893 14.0711 8.25 12 8.25Z" fill="#1c4a30"></path> </g></svg>
+                    </div>
+                    <h3 class="font-bold text-gray-900">Panellum</h3>
+                    <p class="text-sm text-gray-600 mt-1">Tour 360</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition border border-gray-200">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-orange-50 rounded-lg flex items-center justify-center">
+                        <svg version="1.0" class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="#f5bd5b" d="M56,28c0,11.047-8.953,20-20,20H16V28c0-11.047,8.953-20,20-20h20V28z"></path> <g> <path fill="#57573d" d="M36,0C20.535,0,8,12.535,8,28v22.344l-6.828,6.828c-1.562,1.562-1.562,4.094,0,5.656 C1.953,63.609,2.977,64,4,64s2.047-0.391,2.828-1.172L13.656,56H36c15.465,0,28-12.535,28-28V0H36z M56,28 c0,11.047-8.953,20-20,20H16V28c0-11.047,8.953-20,20-20h20V28z"></path> <path fill="#57573d" d="M32,20c0-2.211-1.789-4-4-4s-4,1.789-4,4v14.344l-2.828,2.828c-1.562,1.562-1.562,4.094,0,5.656 C21.953,43.609,22.977,44,24,44s2.047-0.391,2.828-1.172l2.824-2.824H44c2.211,0,4-1.789,4-4s-1.789-4-4-4h-6.348l13.176-13.176 c1.562-1.562,1.562-4.094,0-5.656s-4.094-1.562-5.656,0L32,26.344V20z"></path> </g> </g> </g></svg>                    </div>
+                    <h3 class="font-bold text-gray-900">Leaflet</h3>
+                    <p class="text-sm text-gray-600 mt-1">Mapa 2D</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="bg-gradient-to-r from-[#1455ff] to-[#2c71fc] rounded-2xl shadow-xl lg:p-12 max-w-6xl mx-auto mt-20">
+            <h2 class="text-3xl lg:text-4xl font-bold text-center mb-12 text-white">
+                Nuestro Impacto
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="text-4xl lg:text-5xl font-bold text-white mb-2">35+</div>
+                    <p class="text-blue-100 text-lg">Horas dedicadas</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl lg:text-5xl font-bold text-white mb-2">20+</div>
+                    <p class="text-blue-100 text-lg">Ubicaciones Mapeadas</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl lg:text-5xl font-bold text-white mb-2">24/7</div>
+                    <p class="text-blue-100 text-lg">Disponibilidad</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Final -->
+        <div class="text-center max-w-4xl mx-auto pt-20">
+            <h2 class="text-3xl lg:text-4xl font-bold mb-4 text-gray-900">
+                ¿Tienes alguna sugerencia?
+            </h2>
+            <p class="text-lg text-gray-600 mb-8">
+                Nos encantaría escuchar tus ideas para mejorar la plataforma
+            </p>
+            <a href="mailto:mgodoy2025@alu.uct.cl" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#1455ff] to-[#4e80ff] text-white px-8 py-4 rounded-xl font-bold hover:shadow-lg transition text-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Contáctanos
+            </a>
+        </div>
+</section>
+<section class="bottom-0">
+		<Footer />
+	</section>
+</Layout>
+
+<style>
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 0.6s ease-out;
+    }
+    .gradient-text {
+        background: linear-gradient(
+            to right,
+            #1455ff 10%,
+            #4e80ff 30%,
+            #4784fd 60%,
+            #2c71fc 80%  
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-fill-color: transparent;
+        background-size: 500% auto;
+        animation: textShine 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes textShine {
+        0% {
+            background-position: 0% 50%;
+        }
+        100% {
+            background-position: 100% 50%;
+        }
+    }
+</style>

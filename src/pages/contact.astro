@@ -1,10 +1,11 @@
 ---
 // Componente Contactos.astro
 import Layout from "../layouts/Layout.astro"
+import Footer from "../components/Footer.astro";
 ---
 <Layout>
 <section class="py-16 lg:py-24 bg-gray-50">
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto px-6 pt-10">
         <!-- Header -->
         <div class="text-center animate-[slideDown_0.6s_ease-out_0.1s_both] sm:mb-4">
           <h2 class="text-3xl lg:text-5xl font-black mb-4 gradient-text animation-gradient">
@@ -250,6 +251,9 @@ import Layout from "../layouts/Layout.astro"
         </div>
     </div>
 </section>
+<section class="bottom-0">
+		<Footer />
+	</section>
 </Layout>
 
 <style>

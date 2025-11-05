@@ -247,6 +247,31 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+.gradient-text {
+        background: linear-gradient(
+            to right,
+            #1455ff 10%,
+            #4e80ff 30%,
+            #4784fd 60%,
+            #2c71fc 80%  
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-fill-color: transparent;
+        background-size: 500% auto;
+        animation: textShine 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes textShine {
+        0% {
+            background-position: 0% 50%;
+        }
+        100% {
+            background-position: 100% 50%;
+        }
+    }
 </style>
 
 <!-- Título de la sección -->
@@ -381,7 +406,7 @@
 
 <!-- VERSIÓN DESKTOP -->
 <div class="hidden lg:block">
-    <div class="max-w-[90rem] mx-auto pt-20">
+    <div class="max-w-[90rem] mx-auto pt-7">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Panel Lateral Desktop Optimizado -->
 <div class="lg:col-span-1 space-y-3 max-h-screen overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
@@ -1263,16 +1288,19 @@ document.addEventListener('DOMContentLoaded', function() {
         easeLinearity: 0.5
     });
     
-    // Abrir popup después del zoom con un pequeño delay
-    setTimeout(() => {
-        markerData.marker.openPopup();
-        
-        // Cerrar panel móvil si está expandido
-        const mobilePanel = document.getElementById('mobile-panel');
-        if (mobilePanel && mobilePanel.classList.contains('expanded')) {
-            mobilePanel.classList.remove('expanded');
-        }
-    }, 900);
+    // Esperar a que termine la animación
+    map.once('moveend', () => {
+        setTimeout(() => {
+            // ✅ SOLUCIÓN: Simular un click en el marcador para que se genere el popup actualizado
+            markerData.marker.fire('click');
+            
+            // Cerrar panel móvil si está expandido
+            const mobilePanel = document.getElementById('mobile-panel');
+            if (mobilePanel && mobilePanel.classList.contains('expanded')) {
+                mobilePanel.classList.remove('expanded');
+            }
+        }, 100);
+    });
 }
 
     img.onload = function() {
@@ -1642,7 +1670,7 @@ leafletMarker.on('click', function() {
             // Esperar un poco para asegurar que la vista esté activa
             setTimeout(() => {
                 focusOnMarker(locationName);
-            }, 500);
+            }, 200);
         });
 
         // Usar delegación de eventos para los botones del popup

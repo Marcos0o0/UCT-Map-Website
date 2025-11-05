@@ -53,34 +53,37 @@
         <div class="p-4 bg-gradient-to-r from-blue-500 to-blue-600">
           <h3 class="text-white font-bold text-lg">Escenas del Tour</h3>
         </div>
-        <div class="max-h-[400px] overflow-y-auto p-2">
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="entrada">
-            📍 Entrada principal
-          </button>
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_02">
-            📍 Exterior 02
-          </button>
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_03">
-            📍 Exterior 03
-          </button>
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_04">
-            📍 Exterior 04
-          </button>
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_05">
-            📍 Exterior 05
-          </button>
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_06">
-            📍 Exterior 06
-          </button>
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_07">
-            📍 Exterior 07
-          </button>
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700 mb-1" data-scene="ext_08">
-            📍 Exterior 08
-          </button>
-          <button class="hotspot-item w-full text-left px-4 py-3 rounded-xl hover:bg-blue-50 transition-colors font-medium text-gray-700" data-scene="ext_09">
-            📍 Exterior 09
-          </button>
+        <div class="max-h-[500px] overflow-y-auto p-2">
+            <!-- RECORRIDO EXTERIOR -->
+            <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide">Recorrido Exterior</div>
+            <button class="hotspot-item" data-scene="entrada">🚪 Entrada Principal</button>
+
+            <!-- EDIFICIOS -->
+            <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Edificios</div>
+            <button class="hotspot-item" data-scene="informaciones">📋 Informaciones</button>
+            <button class="hotspot-item" data-scene="pasillo_edf_21">🏢 Pasillo Edificio 21</button>
+            <button class="hotspot-item" data-scene="inters_edf_15_16">🔀 Edificios 15-16</button>
+
+            <!-- AULAS Y ESPACIOS ACADÉMICOS -->
+            <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Espacios Académicos</div>
+            <button class="hotspot-item" data-scene="aula_magna_01">🎭 Aula Magna</button>
+            <button class="hotspot-item" data-scene="sala_clases_01">📚 Salas de Clases</button>
+            <button class="hotspot-item" data-scene="computacion">💻 Sala de Computación</button>
+
+            <!-- BIBLIOTECA -->
+            <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Biblioteca</div>
+            <button class="hotspot-item" data-scene="biblioteca">📖 Biblioteca Central</button>
+            <button class="hotspot-item" data-scene="ent_biblio_01">🚪 Entrada Biblioteca</button>
+
+            <!-- SERVICIOS -->
+            <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Servicios</div>
+            <button class="hotspot-item" data-scene="comedor_01">🍽️ Comedor</button>
+            <button class="hotspot-item" data-scene="estacionamiento">🚗 Estacionamiento</button>
+
+            <!-- ÁREAS RECREATIVAS -->
+            <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Áreas Recreativas</div>
+            <button class="hotspot-item" data-scene="calistenia">💪 Zona de Calistenia</button>
+            <button class="hotspot-item" data-scene="areas_verdes">🌳 Áreas Verdes</button>
         </div>
       </div>
 
@@ -104,7 +107,26 @@ document.addEventListener('DOMContentLoaded', function() {
         'ext_06': 'Exterior 06',
         'ext_07': 'Exterior 07',
         'ext_08': 'Exterior 08',
-        'ext_09': 'Exterior 09'
+        'ext_09': 'Exterior 09',
+        'biblioteca': 'Biblioteca Central',
+        'aula_magna_01': 'Aula Magna - Vista 1',
+        'aula_magna_02': 'Aula Magna - Vista 2',
+        'calistenia': 'Zona de Calistenia',
+        'comedor_01': 'Comedor - Vista 1',
+        'comedor_02': 'Comedor - Vista 2',
+        'computacion': 'Sala de Computación',
+        'ent_aula_magna': 'Entrada Aula Magna',
+        'ent_biblio_01': 'Entrada Biblioteca 1',
+        'ent_biblio_02': 'Entrada Biblioteca 2',
+        'ent_biblio_03': 'Entrada Biblioteca 3',
+        'estacionamiento': 'Estacionamiento',
+        'pasillo_edf_21': 'Pasillo Edificio 21',
+        'informaciones': 'Informaciones',
+        'inters_edf_15_16': 'Intersección Edificio 15-16',
+        'sala_clases_01': 'Sala de Clases 1',
+        'sala_clases_02': 'Sala de Clases 2',
+        'sala_clases_03': 'Sala de Clases 3',
+        'areas_verdes': 'Áreas Verdes'
     };
 
     let currentSceneIndex = 0;
@@ -255,10 +277,281 @@ document.addEventListener('DOMContentLoaded', function() {
                 pitch: 0,
                 yaw: 180,
                 hfov: 120,
-                hotSpots: []
-            }
+                hotSpots: [
+                    {
+                        pitch: -5,
+                        yaw: 185,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "comedor_01"
+                    }
+                ]
+            },
+            comedor_01: {
+            type: "equirectangular",
+            panorama: "./360_img/Comedor_01.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: 0,
+                    yaw: -90,
+                    type: "scene",
+                    text: "Ver otra zona",
+                    sceneId: "comedor_02"
+                }
+            ]
+            },
+            comedor_02: {
+                type: "equirectangular",
+                panorama: "./360_img/Comedor_02.jpg",
+                pitch: 0,
+                yaw: 0,
+                hfov: 120,
+                hotSpots: [
+                    {
+                        pitch: 0,
+                        yaw: 90,
+                        type: "scene",
+                        text: "Vista anterior",
+                        sceneId: "comedor_01"
+                    }
+                ]
+            },
+            biblioteca: {
+    type: "equirectangular",
+    panorama: "./360_img/Biblioteca.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: []
+},
+aula_magna_01: {
+    type: "equirectangular",
+    panorama: "./360_img/Aula_Magna_01.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: 90,
+            type: "scene",
+            text: "Ver otra vista",
+            sceneId: "aula_magna_02"
         }
-    });
+    ]
+},
+aula_magna_02: {
+    type: "equirectangular",
+    panorama: "./360_img/Aula_Magna_02.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: -90,
+            type: "scene",
+            text: "Vista anterior",
+            sceneId: "aula_magna_01"
+        }
+    ]
+},
+calistenia: {
+    type: "equirectangular",
+    panorama: "./360_img/Calistenia.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: []
+},
+
+computacion: {
+    type: "equirectangular",
+    panorama: "./360_img/Computacion.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: []
+},
+ent_aula_magna: {
+    type: "equirectangular",
+    panorama: "./360_img/Ent_Aula_Magna.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: 0,
+            type: "scene",
+            text: "Entrar al Aula Magna",
+            sceneId: "aula_magna_01"
+        }
+    ]
+},
+ent_biblio_01: {
+    type: "equirectangular",
+    panorama: "./360_img/Ent_Biblio_Comput_01.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: 45,
+            type: "scene",
+            text: "Siguiente vista",
+            sceneId: "ent_biblio_02"
+        }
+    ]
+},
+ent_biblio_02: {
+    type: "equirectangular",
+    panorama: "./360_img/Ent_Biblio_Comput_02.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: -45,
+            type: "scene",
+            text: "Vista anterior",
+            sceneId: "ent_biblio_01"
+        },
+        {
+            pitch: 0,
+            yaw: 45,
+            type: "scene",
+            text: "Siguiente vista",
+            sceneId: "ent_biblio_03"
+        }
+    ]
+},
+ent_biblio_03: {
+    type: "equirectangular",
+    panorama: "./360_img/Ent_Biblio_Comput_03.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: -45,
+            type: "scene",
+            text: "Vista anterior",
+            sceneId: "ent_biblio_02"
+        },
+        {
+            pitch: 0,
+            yaw: 0,
+            type: "scene",
+            text: "Entrar a Biblioteca",
+            sceneId: "biblioteca"
+        }
+    ]
+},
+estacionamiento: {
+    type: "equirectangular",
+    panorama: "./360_img/Ent_Estacionamiento.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: []
+},
+pasillo_edf_21: {
+    type: "equirectangular",
+    panorama: "./360_img/Ent_Pasillo_Edf_21.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: []
+},
+informaciones: {
+    type: "equirectangular",
+    panorama: "./360_img/Informaciones.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: []
+},
+inters_edf_15_16: {
+    type: "equirectangular",
+    panorama: "./360_img/Inters_Edf_15_16.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: []
+},
+
+sala_clases_01: {
+    type: "equirectangular",
+    panorama: "./360_img/Sala_Clases_01.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: 90,
+            type: "scene",
+            text: "Siguiente sala",
+            sceneId: "sala_clases_02"
+        }
+    ]
+},
+sala_clases_02: {
+    type: "equirectangular",
+    panorama: "./360_img/Sala_Clases_02.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: -90,
+            type: "scene",
+            text: "Sala anterior",
+            sceneId: "sala_clases_01"
+        },
+        {
+            pitch: 0,
+            yaw: 90,
+            type: "scene",
+            text: "Siguiente sala",
+            sceneId: "sala_clases_03"
+        }
+    ]
+},
+sala_clases_03: {
+    type: "equirectangular",
+    panorama: "./360_img/Sala_Clases_03.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: [
+        {
+            pitch: 0,
+            yaw: -90,
+            type: "scene",
+            text: "Sala anterior",
+            sceneId: "sala_clases_02"
+        }
+    ]
+},
+areas_verdes: {
+    type: "equirectangular",
+    panorama: "./360_img/Areas_Verdes.jpg",
+    pitch: 0,
+    yaw: 0,
+    hfov: 120,
+    hotSpots: []
+}
+        }
+});
 
     // Función para mover controles al contenedor de Pannellum en fullscreen
     function moveControlsToFullscreen() {
@@ -485,4 +778,20 @@ document.addEventListener('DOMContentLoaded', function() {
     #hotspots-menu::-webkit-scrollbar-thumb:hover {
         background: rgba(59, 130, 246, 0.7);
     }
+    .hotspot-item {
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+    font-medium: true;
+    color: #374151;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.hotspot-item:hover {
+    background-color: #EFF6FF;
+    transform: translateX(4px);
+}
 </style>

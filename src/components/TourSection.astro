@@ -56,39 +56,39 @@
         <div class="max-h-[500px] overflow-y-auto p-2">
             <!-- RECORRIDO EXTERIOR -->
             <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide">Recorrido Exterior</div>
-            <button class="hotspot-item" data-scene="entrada">🚪 Entrada Principal</button>
+            <button class="hotspot-item" data-scene="entrada">Entrada Principal</button>
 
             <!-- EDIFICIOS -->
             <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Edificios</div>
-            <button class="hotspot-item" data-scene="informaciones">📋 Informaciones</button>
-            <button class="hotspot-item" data-scene="pasillo_edf_21">🏢 Pasillo Edificio 21</button>
-            <button class="hotspot-item" data-scene="inters_edf_15_16">🔀 Edificios 15-16</button>
+            <button class="hotspot-item" data-scene="informaciones">Informaciones</button>
+            <button class="hotspot-item" data-scene="pasillo_edf_21">Pasillo Edificio 21</button>
+            <button class="hotspot-item" data-scene="inters_edf_15_16">Edificios 15-16</button>
 
             <!-- AULAS Y ESPACIOS ACADÉMICOS -->
             <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Espacios Académicos</div>
-            <button class="hotspot-item" data-scene="aula_magna_01">🎭 Aula Magna</button>
-            <button class="hotspot-item" data-scene="sala_clases_01">📚 Salas de Clases</button>
-            <button class="hotspot-item" data-scene="computacion">💻 Sala de Computación</button>
+            <button class="hotspot-item" data-scene="aula_magna_01">Aula Magna</button>
+            <button class="hotspot-item" data-scene="sala_clases_01">Salas de Clases</button>
+            <button class="hotspot-item" data-scene="computacion">Sala de Computación</button>
 
             <!-- BIBLIOTECA -->
             <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Biblioteca</div>
-            <button class="hotspot-item" data-scene="biblioteca">📖 Biblioteca Central</button>
-            <button class="hotspot-item" data-scene="ent_biblio_01">🚪 Entrada Biblioteca</button>
+            <button class="hotspot-item" data-scene="biblioteca">Biblioteca Central</button>
+            <button class="hotspot-item" data-scene="ent_biblio_01">Entrada Biblioteca</button>
 
             <!-- SERVICIOS -->
             <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Servicios</div>
-            <button class="hotspot-item" data-scene="comedor_01">🍽️ Comedor</button>
-            <button class="hotspot-item" data-scene="estacionamiento">🚗 Estacionamiento</button>
+            <button class="hotspot-item" data-scene="comedor_01">Comedor</button>
+            <button class="hotspot-item" data-scene="estacionamiento">Estacionamiento</button>
 
             <!-- ÁREAS RECREATIVAS -->
             <div class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wide mt-2">Áreas Recreativas</div>
-            <button class="hotspot-item" data-scene="calistenia">💪 Zona de Calistenia</button>
-            <button class="hotspot-item" data-scene="areas_verdes">🌳 Áreas Verdes</button>
+            <button class="hotspot-item" data-scene="calistenia">Zona de Calistenia</button>
+            <button class="hotspot-item" data-scene="areas_verdes">Áreas Verdes</button>
         </div>
       </div>
 
       <!-- Visor Pannellum -->
-      <div id="panorama" data-lenis-prevent class="w-full h-[400px] sm:h-[500px] lg:h-[600px]" style="min-height: 600px;"></div>
+      <div id="panorama" data-lenis-prevent class="w-full h-[700px] sm:h-[500px] lg:h-[700px]" style="min-height: 700px;"></div>
     </div>
   </div>
 </div>
@@ -204,6 +204,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: "scene",
                         text: "Avanzar",
                         sceneId: "ext_05"
+                    },
+                    {
+                        pitch: -5,
+                        yaw: 80,
+                        type: "scene",
+                        text: "Aula Magna",
+                        sceneId: "ent_aula_magna"
                     }
                 ]
             },

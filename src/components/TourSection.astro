@@ -227,6 +227,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: "scene",
                         text: "Avanzar",
                         sceneId: "ext_06"
+                    },
+                    {
+                        pitch: 1,
+                        yaw: 90,
+                        type: "scene",
+                        text: "Entrada Biblioteca",
+                        sceneId: "ent_biblio_01"
                     }
                 ]
             },
@@ -327,237 +334,298 @@ document.addEventListener('DOMContentLoaded', function() {
                 ]
             },
             biblioteca: {
-    type: "equirectangular",
-    panorama: "./360_img/Biblioteca.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: []
-},
-aula_magna_01: {
-    type: "equirectangular",
-    panorama: "./360_img/Aula_Magna_01.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
-            pitch: 0,
-            yaw: 90,
-            type: "scene",
-            text: "Ver otra vista",
-            sceneId: "aula_magna_02"
-        }
-    ]
-},
-aula_magna_02: {
-    type: "equirectangular",
-    panorama: "./360_img/Aula_Magna_02.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
-            pitch: 0,
-            yaw: -90,
-            type: "scene",
-            text: "Vista anterior",
-            sceneId: "aula_magna_01"
-        }
-    ]
-},
-calistenia: {
-    type: "equirectangular",
-    panorama: "./360_img/Calistenia.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: []
-},
-
-computacion: {
-    type: "equirectangular",
-    panorama: "./360_img/Computacion.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: []
-},
-ent_aula_magna: {
-    type: "equirectangular",
-    panorama: "./360_img/Ent_Aula_Magna.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
+            type: "equirectangular",
+            panorama: "./360_img/Biblioteca.jpg",
             pitch: 0,
             yaw: 0,
-            type: "scene",
-            text: "Entrar al Aula Magna",
-            sceneId: "aula_magna_01"
-        }
-    ]
-},
-ent_biblio_01: {
-    type: "equirectangular",
-    panorama: "./360_img/Ent_Biblio_Comput_01.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
-            pitch: 0,
-            yaw: 45,
-            type: "scene",
-            text: "Siguiente vista",
-            sceneId: "ent_biblio_02"
-        }
-    ]
-},
-ent_biblio_02: {
-    type: "equirectangular",
-    panorama: "./360_img/Ent_Biblio_Comput_02.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
-            pitch: 0,
-            yaw: -45,
-            type: "scene",
-            text: "Vista anterior",
-            sceneId: "ent_biblio_01"
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: -3,
+                    yaw: -105,
+                    type: "scene",
+                    text: "Salir de la biblioteca",
+                    sceneId: "ent_biblio_03"
+                }
+            ]
         },
-        {
-            pitch: 0,
-            yaw: 45,
-            type: "scene",
-            text: "Siguiente vista",
-            sceneId: "ent_biblio_03"
-        }
-    ]
-},
-ent_biblio_03: {
-    type: "equirectangular",
-    panorama: "./360_img/Ent_Biblio_Comput_03.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
-            pitch: 0,
-            yaw: -45,
-            type: "scene",
-            text: "Vista anterior",
-            sceneId: "ent_biblio_02"
-        },
-        {
+        aula_magna_01: {
+            type: "equirectangular",
+            panorama: "./360_img/Aula_Magna_01.jpg",
             pitch: 0,
             yaw: 0,
-            type: "scene",
-            text: "Entrar a Biblioteca",
-            sceneId: "biblioteca"
-        }
-    ]
-},
-estacionamiento: {
-    type: "equirectangular",
-    panorama: "./360_img/Ent_Estacionamiento.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: []
-},
-pasillo_edf_21: {
-    type: "equirectangular",
-    panorama: "./360_img/Ent_Pasillo_Edf_21.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: []
-},
-informaciones: {
-    type: "equirectangular",
-    panorama: "./360_img/Informaciones.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: []
-},
-inters_edf_15_16: {
-    type: "equirectangular",
-    panorama: "./360_img/Inters_Edf_15_16.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: []
-},
-
-sala_clases_01: {
-    type: "equirectangular",
-    panorama: "./360_img/Sala_Clases_01.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
-            pitch: 0,
-            yaw: 90,
-            type: "scene",
-            text: "Siguiente sala",
-            sceneId: "sala_clases_02"
-        }
-    ]
-},
-sala_clases_02: {
-    type: "equirectangular",
-    panorama: "./360_img/Sala_Clases_02.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
-            pitch: 0,
-            yaw: -90,
-            type: "scene",
-            text: "Sala anterior",
-            sceneId: "sala_clases_01"
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: -3,
+                    yaw: 179,
+                    type: "scene",
+                    text: "Ver otra vista",
+                    sceneId: "aula_magna_02"
+                }
+            ]
         },
-        {
+        aula_magna_02: {
+            type: "equirectangular",
+            panorama: "./360_img/Aula_Magna_02.jpg",
             pitch: 0,
-            yaw: 90,
-            type: "scene",
-            text: "Siguiente sala",
-            sceneId: "sala_clases_03"
-        }
-    ]
-},
-sala_clases_03: {
-    type: "equirectangular",
-    panorama: "./360_img/Sala_Clases_03.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: [
-        {
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: -3,
+                    yaw: -17,
+                    type: "scene",
+                    text: "Ver otra vista",
+                    sceneId: "aula_magna_03"
+                },
+                {
+                    pitch: -5,
+                    yaw: -115,
+                    type: "scene",
+                    text: "Vista anterior",
+                    sceneId: "aula_magna_01"
+                }
+            ]
+        },
+        aula_magna_03: {
+            type: "equirectangular",
+            panorama: "./360_img/Aula_Magna_03.jpg",
             pitch: 0,
-            yaw: -90,
-            type: "scene",
-            text: "Sala anterior",
-            sceneId: "sala_clases_02"
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: -5,
+                    yaw: 179,
+                    type: "scene",
+                    text: "Vista anterior",
+                    sceneId: "aula_magna_02"
+                }
+            ]
+        },
+        calistenia: {
+            type: "equirectangular",
+            panorama: "./360_img/Calistenia.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: []
+        },
+
+        computacion: {
+            type: "equirectangular",
+            panorama: "./360_img/Computacion.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: []
+        },
+        ent_aula_magna: {
+            type: "equirectangular",
+            panorama: "./360_img/Ent_Aula_Magna_01.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: 0,
+                    yaw: 0,
+                    type: "scene",
+                    text: "Salir del aula magna",
+                    sceneId: "ext_04"
+                },
+                {
+                    pitch: -15,
+                    yaw: 185,
+                    type: "scene",
+                    text: "Avanzar",
+                    sceneId: "ent_aula_magna_02"
+                }
+            ]
+        },
+        ent_aula_magna_02: {
+            type: "equirectangular",
+            panorama: "./360_img/Ent_Aula_Magna_02.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: -1,
+                    yaw: 110,
+                    type: "scene",
+                    text: "Entrar al aula magna",
+                    sceneId: "aula_magna_01"
+                },
+            ]
+        },
+        ent_biblio_01: {
+            type: "equirectangular",
+            panorama: "./360_img/Ent_Biblio_Comput_01.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: -2,
+                    yaw: -26,
+                    type: "scene",
+                    text: "Entrar a Biblioteca",
+                    sceneId: "ent_biblio_02"
+                },
+                {
+                    pitch: -10,
+                    yaw: 187,
+                    type: "scene",
+                    text: "Salir de la biblioteca",
+                    sceneId: "ext_05"
+                }
+            ]
+        },
+        ent_biblio_02: {
+            type: "equirectangular",
+            panorama: "./360_img/Ent_Biblio_Comput_02.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: -2,
+                    yaw: -165,
+                    type: "scene",
+                    text: "Siguiente vista",
+                    sceneId: "ent_biblio_03"
+                },
+                {
+                    pitch: -1,
+                    yaw: 65,
+                    type: "scene",
+                    text: "Vista anterior",
+                    sceneId: "ent_biblio_01"
+                }
+            ]
+        },
+        ent_biblio_03: {
+            type: "equirectangular",
+            panorama: "./360_img/Ent_Biblio_Comput_03.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: -6,
+                    yaw: -220,
+                    type: "scene",
+                    text: "Entrar a Biblioteca",
+                    sceneId: "biblioteca"
+                },
+                {
+                    pitch: 0,
+                    yaw: -15,
+                    type: "scene",
+                    text: "Vista anterior",
+                    sceneId: "ent_biblio_02"
+                }
+            ]
+        },
+        estacionamiento: {
+            type: "equirectangular",
+            panorama: "./360_img/Ent_Estacionamiento.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: []
+        },
+        pasillo_edf_21: {
+            type: "equirectangular",
+            panorama: "./360_img/Ent_Pasillo_Edf_21.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: []
+        },
+        informaciones: {
+            type: "equirectangular",
+            panorama: "./360_img/Informaciones.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: []
+        },
+        inters_edf_15_16: {
+            type: "equirectangular",
+            panorama: "./360_img/Inters_Edf_15_16.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: []
+        },
+
+        sala_clases_01: {
+            type: "equirectangular",
+            panorama: "./360_img/Sala_Clases_01.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: 0,
+                    yaw: 90,
+                    type: "scene",
+                    text: "Siguiente sala",
+                    sceneId: "sala_clases_02"
+                }
+            ]
+        },
+        sala_clases_02: {
+            type: "equirectangular",
+            panorama: "./360_img/Sala_Clases_02.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: 0,
+                    yaw: -90,
+                    type: "scene",
+                    text: "Sala anterior",
+                    sceneId: "sala_clases_01"
+                },
+                {
+                    pitch: 0,
+                    yaw: 90,
+                    type: "scene",
+                    text: "Siguiente sala",
+                    sceneId: "sala_clases_03"
+                }
+            ]
+        },
+        sala_clases_03: {
+            type: "equirectangular",
+            panorama: "./360_img/Sala_Clases_03.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: [
+                {
+                    pitch: 0,
+                    yaw: -90,
+                    type: "scene",
+                    text: "Sala anterior",
+                    sceneId: "sala_clases_02"
+                }
+            ]
+        },
+        areas_verdes: {
+            type: "equirectangular",
+            panorama: "./360_img/Areas_Verdes.jpg",
+            pitch: 0,
+            yaw: 0,
+            hfov: 120,
+            hotSpots: []
         }
-    ]
-},
-areas_verdes: {
-    type: "equirectangular",
-    panorama: "./360_img/Areas_Verdes.jpg",
-    pitch: 0,
-    yaw: 0,
-    hfov: 120,
-    hotSpots: []
-}
-        }
+    }
 });
 
     // Función para mover controles al contenedor de Pannellum en fullscreen

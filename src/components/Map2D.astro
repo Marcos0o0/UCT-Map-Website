@@ -107,63 +107,62 @@
        /* Reemplaza los estilos .mobile-panel en tu <style> con esto: */
 
     .mobile-panel {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        transform: translateY(calc(100% - 80px));
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        max-height: 85vh;
-        z-index: 50;
-        background: white;
-        border-radius: 20px 20px 0 0;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-        /* Importante: permitir que el contenido sea scrolleable */
-        display: flex;
-        flex-direction: column;
-    }
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            transform: translateY(calc(100% - 80px));
+            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            max-height: 85vh;
+            z-index: 50;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            will-change: transform;
+            display: flex;
+            flex-direction: column;
+        }
 
     .mobile-panel.expanded {
-        transform: translateY(0) !important;
-    }
+            transform: translateY(0) !important;
+        }
 
     .mobile-panel-handle {
-        width: 40px;
-        height: 4px;
-        background: #d1d5db;
-        border-radius: 9999px;
-        margin: 12px auto;
-        cursor: grab;
-        transition: background-color 0.2s;
-        flex-shrink: 0; /* No se comprime */
-        /* Aumentar área táctil */
-        position: relative;
-    }
+            width: 40px;
+            height: 4px;
+            background: #d1d5db;
+            border-radius: 9999px;
+            margin: 12px auto;
+            cursor: grab;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            position: relative;
+        }
 
-    .mobile-panel-handle::before {
-        content: '';
-        position: absolute;
-        top: -12px;
-        left: -20px;
-        right: -20px;
-        bottom: -12px;
-    }
+        .mobile-panel-handle::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: -20px;
+            right: -20px;
+            bottom: -12px;
+        }
 
     .mobile-panel-handle:hover {
-        background: #9ca3af;
-    }
+            background: #9ca3af;
+        }
 
     .mobile-panel-handle:active {
-        cursor: grabbing;
-        background: #6b7280;
-    }
+            cursor: grabbing;
+            background: #6b7280;
+        }
 
-    /* Contenedor scrolleable */
-    .mobile-panel > div:last-child {
-        flex: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
+        .mobile-panel > div:last-child {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
 
     /* Prevenir scroll cuando el panel está colapsado */
     .mobile-panel:not(.expanded) > div:last-child {
@@ -174,6 +173,14 @@
     .mobile-panel > div:last-child {
         -webkit-overflow-scrolling: touch;
     }
+
+    .leaflet-control-attribution {
+            display: none !important;
+        }
+
+        .leaflet-container {
+            background: transparent !important;
+        }
 
     /* Asegurar que el contenido del panel no interfiera con el drag */
     .mobile-panel.dragging {
@@ -209,21 +216,129 @@
 
 /* Estilos para los checkboxes personalizados */
 .custom-checkbox input:checked ~ .checkmark {
-    background-color: #2563eb;
-    border-color: #2563eb;
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+/* Toast Notifications */
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 100%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+            to {
+                transform: translate(-50%, 100%);
+                opacity: 0;
+            }
+        }
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Toast Notifications - VERSIÓN MEJORADA */
+.toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    max-width: 90%;
+    pointer-events: auto;
+    animation: toastSlideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast-removing {
+    animation: toastSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Animación de entrada (desde arriba) */
+@keyframes toastSlideDown {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -100px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Animación de salida (hacia arriba) */
+@keyframes toastSlideUp {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50px);
+    }
+}
+
+/* Responsive para móvil */
+@media (max-width: 1023px) {
+    .toast {
+        top: 100px;
+        left: 20px;
+        right: 20px;
+        transform: translateX(0);
+        max-width: calc(100% - 40px);
+    }
+    
+    @keyframes toastSlideDown {
+        0% {
+            opacity: 0;
+            transform: translateY(-100px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes toastSlideUp {
+        0% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+    }
 }
 
 .custom-checkbox input:checked ~ .checkmark:after {
-    content: "";
-    position: absolute;
-    left: 4px;
-    top: 1px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
+            content: "";
+            position: absolute;
+            display: block;
+            left: 6px;
+            top: 2px;
+            width: 4px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
 
 .custom-checkbox:hover input ~ .checkmark {
     border-color: #3b82f6;
@@ -272,6 +387,60 @@
             background-position: 100% 50%;
         }
     }
+
+    /* Añadir estados de interacción más claros */
+.custom-checkbox:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s;
+}
+
+.checkmark {
+            position: relative;
+            height: 20px;
+            width: 20px;
+            background-color: white;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+.marker-filter:checked + .checkmark {
+    animation: checkBounce 0.3s ease;
+}
+
+@keyframes checkBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* Mejorar contraste de botones */
+button:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Mejorar panel móvil con springs */
+.mobile-panel {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Animación de entrada de marcadores */
+@keyframes markerFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.leaflet-marker-icon {
+    animation: markerFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
 </style>
 
 <!-- Título de la sección -->
@@ -348,7 +517,7 @@
                         <label class="custom-checkbox flex items-center cursor-pointer select-none p-2 rounded-lg transition-colors">
                             <input type="checkbox" id="select-all-mobile" class="absolute opacity-0 cursor-pointer" checked>
                             <span class="checkmark relative h-5 w-5 bg-white border-2 border-gray-300 rounded-md transition-all flex-shrink-0"></span>
-                            <span id="select-all-text-mobile" class="label-text ml-2.5 text-gray-900 text-sm font-bold">Deseleccionar Todo</span>
+                            <span id="select-all-text-mobile" class="label-text ml-2.5 text-gray-900 text-sm font-medium">Deseleccionar Todo</span>
                         </label>
 
                         <div class="border-t border-gray-200 my-2"></div>
@@ -515,7 +684,7 @@
             <label class="custom-checkbox flex items-center cursor-pointer select-none p-2 rounded-md transition-colors mb-3">
                 <input type="checkbox" id="select-all-desktop" class="absolute opacity-0 cursor-pointer" checked>
                 <span class="checkmark relative h-4 w-4 bg-white border-2 border-gray-300 rounded transition-all flex-shrink-0"></span>
-                <span id="select-all-text-desktop" class="label-text ml-2 text-gray-900 text-xs font-bold">Deseleccionar Todo</span>
+                <span id="select-all-text-desktop" class="label-text ml-2 text-gray-900 text-xs font-medium">Deseleccionar Todo</span>
             </label>
 
             <div class="border-t border-gray-300 mb-3"></div>
@@ -656,6 +825,97 @@ document.addEventListener('DOMContentLoaded', function() {
     let userLocation = null;
     let watchId = null;
 
+
+    // ===== AGREGAR ESTAS 3 FUNCIONES AQUÍ =====
+
+// Sistema de Toast
+function showToast(message, type = 'info', duration = 3000) {
+    // Remover toasts anteriores
+    document.querySelectorAll('.toast').forEach(t => t.remove());
+    
+    const toast = document.createElement('div');
+    
+    // ⚠️ ESTILOS INLINE FORZADOS (para debugging)
+    toast.style.cssText = `
+        position: fixed !important;
+        top: 80px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 99999 !important;
+        max-width: 90% !important;
+        pointer-events: auto !important;
+        animation: slideDown 0.3s ease-out !important;
+    `;
+    
+    const icons = {
+        success: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>',
+        error: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>',
+        warning: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>',
+        info: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>'
+    };
+    
+    const colors = {
+        success: 'bg-green-600',
+        error: 'bg-red-600',
+        warning: 'bg-yellow-600',
+        info: 'bg-blue-600'
+    };
+    
+    toast.innerHTML = `
+        <div class="${colors[type]} text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3" style="min-width: 300px;">
+            ${icons[type]}
+            <span class="font-medium">${message}</span>
+        </div>
+    `;
+    
+    console.log('🍞 Toast creado:', message, 'Tipo:', type); // Debug
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// Loading State
+function showLoadingState(button, text = 'Cargando...') {
+    if (!button) return;
+    button.disabled = true;
+    button.dataset.originalHtml = button.innerHTML;
+    
+    const isMobile = button.id === 'location-fab';
+    
+    button.innerHTML = `
+        <div class="flex items-center justify-center gap-2">
+            <svg class="${isMobile ? 'w-7 h-7' : 'w-5 h-5'} animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            ${isMobile ? '' : `<span>${text}</span>`}
+        </div>
+    `;
+}
+
+function hideLoadingState(button) {
+    if (!button) return;
+    button.disabled = false;
+    if (button.dataset.originalHtml) {
+        button.innerHTML = button.dataset.originalHtml;
+        delete button.dataset.originalHtml;
+    }
+}
+
+// Debounce
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+}
+
+
     const campusBounds = {
         north: -38.73702544894389,
         south: -38.73849415351934,
@@ -768,129 +1028,96 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function getUserLocation() {
-        if (!navigator.geolocation) {
-            alert('Tu navegador no soporta geolocalización');
-            return;
-        }
-
-        const locationBtn = document.getElementById('location-fab') || document.getElementById('get-location-btn-desktop');
-        
-        if (locationBtn) {
-            locationBtn.disabled = true;
-            locationBtn.innerHTML = `
-                <div class="flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span>Calculando...</span>
-                </div>
-            `;        
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude, accuracy } = position.coords;
-                const mapCoords = gpsToMapCoords(latitude, longitude);
-
-                if (!mapCoords) {
-                    const centerLat = -38.73763636676646;
-                    const centerLng = -72.6017205978565;
-                    const distance = calculateDistanceGPS(latitude, longitude, centerLat, centerLng);
-                    
-                    alert(
-                        `FUERA DEL CAMPUS UCT\n\n` +
-                        `Estás a ~${Math.round(distance)} metros del campus.\n\n` +
-                        `La navegación solo funciona dentro del campus UCT Temuco.`
-                    );
-                    
-                    if (locationBtn) {
-                        locationBtn.disabled = false;
-                        locationBtn.innerHTML = `
-                            <svg class="w-7 h-7 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        `;
-                    }
-                    return;
-                }
-
-                userLocation = mapCoords;
-                showUserLocation(mapCoords, accuracy);
-
-                const routeFromMobile = document.getElementById('route-from-mobile');
-                const routeFromDesktop = document.getElementById('route-from-desktop');
-                
-                [routeFromMobile, routeFromDesktop].forEach(select => {
-                    if (!select) return;
-                    let option = select.querySelector('option[value="__user_location__"]');
-                    if (!option) {
-                        option = document.createElement('option');
-                        option.value = '__user_location__';
-                        select.insertBefore(option, select.firstChild);
-                    }
-                    option.textContent = 'Mi Ubicación';
-                    select.value = '__user_location__';
-                });
-
-                if (locationBtn) {
-                    locationBtn.disabled = false;
-                    locationBtn.classList.add('pulse-green');
-                    if (locationBtn.id === 'location-fab') {
-                        locationBtn.innerHTML = `
-                            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
-                            </svg>
-                        `;
-                    } else {
-                        locationBtn.innerHTML = `
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
-                            </svg>
-                            Mi Ubicación
-                        `;
-                    }
-                }
-            },
-            (error) => {
-                let message = 'No se pudo obtener tu ubicación.\n\n';
-                
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        message += 'Permiso denegado.\n\n';
-                        message += 'Ve a Configuración → Permisos del sitio → Ubicación';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message += 'Señal GPS no disponible.\n\n';
-                        message += 'Asegúrate de estar al aire libre o cerca de una ventana.';
-                        break;
-                    case error.TIMEOUT:
-                        message += 'Tiempo de espera agotado.\n\n';
-                        message += 'Verifica tu conexión y vuelve a intentar.';
-                        break;
-                }
-                
-                alert(message);
-                
-                if (locationBtn) {
-                    locationBtn.disabled = false;
-                    if (locationBtn.id === 'location-fab') {
-                        locationBtn.innerHTML = `
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        `;
-                    }
-                }
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 0
-            }
-        );
+    if (!navigator.geolocation) {
+        showToast('Tu navegador no soporta geolocalización', 'error');
+        return;
     }
+
+    const locationBtn = document.getElementById('location-fab') || document.getElementById('get-location-btn-desktop');
+    
+    showLoadingState(locationBtn, 'Obteniendo ubicación...');
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const { latitude, longitude, accuracy } = position.coords;
+            const mapCoords = gpsToMapCoords(latitude, longitude);
+
+            if (!mapCoords) {
+                const centerLat = -38.73763636676646;
+                const centerLng = -72.6017205978565;
+                const distance = calculateDistanceGPS(latitude, longitude, centerLat, centerLng);
+                
+                showToast(`Fuera del campus (~${Math.round(distance)}m de distancia)`, 'warning', 4000);
+                hideLoadingState(locationBtn);
+                return;
+            }
+
+            userLocation = mapCoords;
+            showUserLocation(mapCoords, accuracy);
+
+            const routeFromMobile = document.getElementById('route-from-mobile');
+            const routeFromDesktop = document.getElementById('route-from-desktop');
+            
+            [routeFromMobile, routeFromDesktop].forEach(select => {
+                if (!select) return;
+                let option = select.querySelector('option[value="__user_location__"]');
+                if (!option) {
+                    option = document.createElement('option');
+                    option.value = '__user_location__';
+                    select.insertBefore(option, select.firstChild);
+                }
+                option.textContent = '📍 Mi Ubicación';
+                select.value = '__user_location__';
+            });
+
+            hideLoadingState(locationBtn);
+            
+            if (locationBtn) {
+                locationBtn.classList.add('pulse-green');
+                if (locationBtn.id === 'location-fab') {
+                    locationBtn.innerHTML = `
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+                        </svg>
+                    `;
+                } else {
+                    locationBtn.innerHTML = `
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+                        </svg>
+                        Mi Ubicación
+                    `;
+                }
+            }
+
+            showToast('Ubicación obtenida correctamente', 'success', 2000);
+        },
+        (error) => {
+            hideLoadingState(locationBtn);
+            
+            let message = 'No se pudo obtener tu ubicación';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'Permiso de ubicación denegado';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'Señal GPS no disponible';
+                    break;
+                case error.TIMEOUT:
+                    message = 'Tiempo de espera agotado';
+                    break;
+            }
+            
+            showToast(message, 'error', 4000);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+    );
+}
 
     function showUserLocation(coords, accuracy) {
         if (!map) return;
@@ -1383,8 +1610,8 @@ document.addEventListener('DOMContentLoaded', function() {
         map = L.map(mapElementId, {
             crs: L.CRS.Simple,
             maxBoundsViscosity: 1.0,
-            minZoom: -0.6,
-            maxZoom: 0.5,
+            minZoom: -0.4,
+            maxZoom: 0.7,
             zoomControl: false,
             tap: true,
             touchZoom: true,
@@ -1839,57 +2066,51 @@ function updateSelectAllCheckbox() {
         ];
 
         calculateBtns.forEach(({ btn, from, to }) => {
-            if (!btn) return;
-            
-            btn.addEventListener('click', () => {
-                const fromValue = from ? from.value : '';
-                const toValue = to ? to.value : '';
+    if (!btn) return;
+    
+    btn.addEventListener('click', () => {
+        const fromValue = from ? from.value : '';
+        const toValue = to ? to.value : '';
 
-                if (!toValue) {
-                    alert('Por favor selecciona un destino');
-                    return;
-                }
+        if (!toValue) {
+            showToast('Selecciona un destino', 'warning');
+            return;
+        }
 
-                if (fromValue === '__user_location__' && !userLocation) {
-                    alert('⚠️ Primero debes obtener tu ubicación');
-                    return;
-                }
+        if (fromValue === '__user_location__' && !userLocation) {
+            showToast('Primero obtén tu ubicación', 'warning');
+            return;
+        }
 
-                if (fromValue && fromValue === toValue) {
-                    alert('El origen y destino no pueden ser el mismo lugar');
-                    return;
-                }
+        if (fromValue && fromValue === toValue) {
+            showToast('El origen y destino no pueden ser iguales', 'error');
+            return;
+        }
 
-                btn.disabled = true;
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = `
-                    <svg class="w-5 h-5 animate-spin mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                `;
+        showLoadingState(btn, 'Calculando ruta...');
 
-                let fromPos, fromName;
-                if (fromValue === '__user_location__') {
-                    fromPos = userLocation;
-                    fromName = 'Tu Ubicación';
-                } else if (fromValue) {
-                    fromPos = markersMap[fromValue].pos;
-                    fromName = fromValue;
-                } else {
-                    fromPos = mainEntrance.pos;
-                    fromName = 'Entrada Principal';
-                }
+        let fromPos, fromName;
+        if (fromValue === '__user_location__') {
+            fromPos = userLocation;
+            fromName = 'Tu Ubicación';
+        } else if (fromValue) {
+            fromPos = markersMap[fromValue].pos;
+            fromName = fromValue;
+        } else {
+            fromPos = mainEntrance.pos;
+            fromName = 'Entrada Principal';
+        }
 
-                const toPos = markersMap[toValue].pos;
+        const toPos = markersMap[toValue].pos;
 
-                setTimeout(() => {
-                    drawRoute(fromPos, toPos, fromName, toValue);
-                    focusOnMarker(toValue);
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
-                }, 300);
-            });
-        });
+        setTimeout(() => {
+            drawRoute(fromPos, toPos, fromName, toValue);
+            focusOnMarker(toValue);
+            hideLoadingState(btn);
+            showToast('Ruta calculada', 'success', 2000);
+        }, 300);
+    });
+});
 
         // Event listeners para limpiar ruta
         document.querySelectorAll('[id^="clear-route"]').forEach(btn => {
@@ -1905,6 +2126,7 @@ function updateSelectAllCheckbox() {
                 if (map) {
                     map.setView([height / 2, width / 2], -1);
                 }
+                showToast('Ruta eliminada', 'info', 2000);
             });
         });
 
@@ -1933,115 +2155,39 @@ function updateSelectAllCheckbox() {
         });
 
         // Panel móvil deslizable
+        // Panel móvil deslizable MEJORADO
         const panelHandle = mobilePanel?.querySelector('.mobile-panel-handle');
 
         if (mobilePanel && panelHandle) {
             let startY = 0;
-            let currentTranslate = 0;
+            let currentY = 0;
             let isDragging = false;
             let startTime = 0;
+            let isExpanded = false;
             
-            // Altura del panel cuando está colapsado (solo se ve el handle)
-            const collapsedHeight = 80;
-            const panelHeight = mobilePanel.offsetHeight;
+            const COLLAPSED_HEIGHT = 80;
+            const VELOCITY_THRESHOLD = 0.3;
+            const POSITION_THRESHOLD = 0.4; // 40% del recorrido
             
-            function handleTouchStart(e) {
-                startY = e.touches[0].clientY;
-                startTime = Date.now();
-                isDragging = true;
-                
-                // Obtener la posición actual del panel
-                const transform = window.getComputedStyle(mobilePanel).transform;
-                if (transform !== 'none') {
-                    const matrix = new DOMContentCSSMatrix(transform);
-                    currentTranslate = matrix.m42; // translateY
-                } else {
-                    currentTranslate = mobilePanel.classList.contains('expanded') ? 0 : panelHeight - collapsedHeight;
-                }
-                
-                // Remover la transición mientras se arrastra
-                mobilePanel.style.transition = 'none';
+            function getTranslateY() {
+                const style = window.getComputedStyle(mobilePanel);
+                const matrix = new WebKitCSSMatrix(style.transform);
+                return matrix.m42;
             }
             
-            function handleTouchMove(e) {
-                if (!isDragging) return;
-                
-                const currentY = e.touches[0].clientY;
-                const deltaY = currentY - startY;
-                
-                // Calcular nueva posición
-                let newTranslate = currentTranslate + deltaY;
-                
-                // Limitar el rango de movimiento
-                const maxTranslate = panelHeight - collapsedHeight; // Posición colapsada
-                const minTranslate = 0; // Posición expandida
-                
-                // Aplicar resistencia cuando se intenta arrastrar más allá de los límites
-                if (newTranslate < minTranslate) {
-                    newTranslate = minTranslate - (minTranslate - newTranslate) * 0.3;
-                } else if (newTranslate > maxTranslate) {
-                    newTranslate = maxTranslate + (newTranslate - maxTranslate) * 0.3;
-                }
-                
-                // Aplicar la transformación
-                mobilePanel.style.transform = `translateY(${newTranslate}px)`;
-                
-                // Prevenir scroll del body cuando se arrastra hacia arriba
-                if (deltaY < 0 || !mobilePanel.classList.contains('expanded')) {
-                    e.preventDefault();
-                }
-            }
-            
-            function handleTouchEnd(e) {
-                if (!isDragging) return;
-                
-                isDragging = false;
-                const endTime = Date.now();
-                const timeDiff = endTime - startTime;
-                
-                // Restaurar la transición
+            function snapToPosition(expand) {
+                isExpanded = expand;
                 mobilePanel.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                 
-                // Obtener la posición final
-                const transform = window.getComputedStyle(mobilePanel).transform;
-                let finalTranslate = 0;
-                
-                if (transform !== 'none') {
-                    const matrix = new DOMContentCSSMatrix(transform);
-                    finalTranslate = matrix.m42;
-                }
-                
-                const deltaY = finalTranslate - currentTranslate;
-                const velocity = Math.abs(deltaY) / timeDiff; // pixels por ms
-                
-                const threshold = (panelHeight - collapsedHeight) / 2;
-                
-                // Decisión basada en velocidad o posición
-                if (velocity > 0.5) {
-                    // Swipe rápido
-                    if (deltaY > 0) {
-                        // Swipe hacia abajo - colapsar
-                        mobilePanel.classList.remove('expanded');
-                        mobilePanel.style.transform = `translateY(calc(100% - ${collapsedHeight}px))`;
-                    } else {
-                        // Swipe hacia arriba - expandir
-                        mobilePanel.classList.add('expanded');
-                        mobilePanel.style.transform = 'translateY(0)';
-                    }
+                if (expand) {
+                    mobilePanel.classList.add('expanded');
+                    mobilePanel.style.transform = 'translateY(0)';
                 } else {
-                    // Decisión basada en posición
-                    if (finalTranslate > threshold) {
-                        // Más cerca de colapsado
-                        mobilePanel.classList.remove('expanded');
-                        mobilePanel.style.transform = `translateY(calc(100% - ${collapsedHeight}px))`;
-                    } else {
-                        // Más cerca de expandido
-                        mobilePanel.classList.add('expanded');
-                        mobilePanel.style.transform = 'translateY(0)';
-                    }
+                    mobilePanel.classList.remove('expanded');
+                    mobilePanel.style.transform = `translateY(calc(100% - ${COLLAPSED_HEIGHT}px))`;
                 }
                 
-                // Limpiar inline styles después de la transición
+                // Limpiar estilos inline después de la animación
                 setTimeout(() => {
                     if (!isDragging) {
                         mobilePanel.style.transition = '';
@@ -2050,19 +2196,100 @@ function updateSelectAllCheckbox() {
                 }, 300);
             }
             
-            // Eventos en el handle
+            function handleTouchStart(e) {
+                // Solo permitir drag desde el handle
+                if (!e.target.closest('.mobile-panel-handle')) return;
+                
+                isDragging = true;
+                startY = e.touches[0].clientY;
+                currentY = startY;
+                startTime = Date.now();
+                
+                // Remover transición para movimiento suave
+                mobilePanel.style.transition = 'none';
+                
+                // Prevenir selección de texto
+                e.preventDefault();
+            }
+            
+            function handleTouchMove(e) {
+                if (!isDragging) return;
+                
+                currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+                
+                // Calcular el porcentaje de apertura
+                const panelHeight = mobilePanel.offsetHeight;
+                const maxDrag = panelHeight - COLLAPSED_HEIGHT;
+                
+                // Posición base según estado actual
+                const baseTranslate = isExpanded ? 0 : maxDrag;
+                let newTranslate = baseTranslate + deltaY;
+                
+                // Aplicar límites con resistencia
+                if (newTranslate < -50) { // Límite superior con resistencia
+                    newTranslate = -50 + (newTranslate + 50) * 0.2;
+                } else if (newTranslate > maxDrag + 50) { // Límite inferior con resistencia
+                    newTranslate = maxDrag + 50 - (maxDrag + 50 - newTranslate) * 0.2;
+                }
+                
+                // Aplicar transformación
+                mobilePanel.style.transform = `translateY(${newTranslate}px)`;
+                
+                // Prevenir scroll del documento
+                e.preventDefault();
+            }
+            
+            function handleTouchEnd(e) {
+                if (!isDragging) return;
+                
+                isDragging = false;
+                
+                const endTime = Date.now();
+                const timeDiff = Math.max(endTime - startTime, 1); // Evitar división por 0
+                const deltaY = currentY - startY;
+                const velocity = Math.abs(deltaY) / timeDiff; // px/ms
+                
+                const panelHeight = mobilePanel.offsetHeight;
+                const maxDrag = panelHeight - COLLAPSED_HEIGHT;
+                const currentTranslate = getTranslateY();
+                const dragPercent = Math.abs(currentTranslate) / maxDrag;
+                
+                // Decisión de expansión/colapso
+                let shouldExpand = isExpanded;
+                
+                // 1. Prioridad a velocidad (swipe rápido)
+                if (velocity > VELOCITY_THRESHOLD) {
+                    shouldExpand = deltaY < 0; // Negativo = hacia arriba = expandir
+                }
+                // 2. Decisión por posición si el movimiento fue lento
+                else {
+                    if (isExpanded) {
+                        // Si está expandido, colapsar solo si se arrastró más del 40% hacia abajo
+                        shouldExpand = dragPercent < POSITION_THRESHOLD;
+                    } else {
+                        // Si está colapsado, expandir solo si se arrastró más del 40% hacia arriba
+                        shouldExpand = dragPercent > (1 - POSITION_THRESHOLD);
+                    }
+                }
+                
+                // Aplicar posición final
+                snapToPosition(shouldExpand);
+            }
+            
+            // Event listeners con opciones optimizadas
             panelHandle.addEventListener('touchstart', handleTouchStart, { passive: false });
             document.addEventListener('touchmove', handleTouchMove, { passive: false });
-            document.addEventListener('touchend', handleTouchEnd);
+            document.addEventListener('touchend', handleTouchEnd, { passive: true });
             
-            // También permitir click en el handle
-            panelHandle.addEventListener('click', () => {
-                if (!isDragging) {
-                    mobilePanel.classList.toggle('expanded');
+            // Click como alternativa (para testing en desktop)
+            panelHandle.addEventListener('click', (e) => {
+                if (e.detail === 1) { // Solo clicks simples
+                    snapToPosition(!isExpanded);
                 }
             });
             
-            // Cleanup
+            // Cleanup al salir
             window.addEventListener('beforeunload', () => {
                 panelHandle.removeEventListener('touchstart', handleTouchStart);
                 document.removeEventListener('touchmove', handleTouchMove);
@@ -2149,5 +2376,8 @@ if (mobilePanel && mapContainer) {
     
     observer.observe(mobilePanel, { attributes: true, attributeFilter: ['class'] });
 }
+
+
+
 });
 </script>

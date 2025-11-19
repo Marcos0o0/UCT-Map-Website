@@ -172,6 +172,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: "scene",
                         text: "Avanzar",
                         sceneId: "ext_03"
+                    },
+                    {
+                        pitch: -2,
+                        yaw: 0,
+                        type: "scene",
+                        text: "Volver atrás",
+                        sceneId: "entrada"
                     }
                 ]
             },
@@ -188,6 +195,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: "scene",
                         text: "Avanzar",
                         sceneId: "ext_04"
+                    },
+                    {
+                        pitch: -2,
+                        yaw: 176,
+                        type: "scene",
+                        text: "Volver atrás",
+                        sceneId: "ext_02"
                     }
                 ]
             },
@@ -211,6 +225,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: "scene",
                         text: "Aula Magna",
                         sceneId: "ent_aula_magna"
+                    },
+                    {
+                        pitch: -2,
+                        yaw: 179,
+                        type: "scene",
+                        text: "Volver atrás",
+                        sceneId: "ext_03"
                     }
                 ]
             },
@@ -218,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 type: "equirectangular",
                 panorama: "./360_img/Ext_05.jpg",
                 pitch: 0,
-                yaw: 0,
+                yaw: -4,
                 hfov: 120,
                 hotSpots: [
                     {
@@ -234,6 +255,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: "scene",
                         text: "Entrada Biblioteca",
                         sceneId: "ent_biblio_01"
+                    },
+                    {
+                        pitch: -2,
+                        yaw: 174,
+                        type: "scene",
+                        text: "Volver atrás",
+                        sceneId: "ext_04"
                     }
                 ]
             },
@@ -241,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 type: "equirectangular",
                 panorama: "./360_img/Ext_06.jpg",
                 pitch: 0,
-                yaw: 0,
+                yaw: -5,
                 hfov: 120,
                 hotSpots: [
                     {
@@ -250,6 +278,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: "scene",
                         text: "Avanzar",
                         sceneId: "ext_07"
+                    },
+                    {
+                        pitch: -2,
+                        yaw: 173,
+                        type: "scene",
+                        text: "Volver atrás",
+                        sceneId: "ext_03"
+                    },
+                    {
+                        pitch: -2,
+                        yaw: 82,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: ""
                     }
                 ]
             },
@@ -294,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 hotSpots: [
                     {
                         pitch: -5,
-                        yaw: 185,
+                        yaw: 182,
                         type: "scene",
                         text: "Avanzar",
                         sceneId: "comedor_01"
@@ -304,16 +346,23 @@ document.addEventListener('DOMContentLoaded', function() {
             comedor_01: {
             type: "equirectangular",
             panorama: "./360_img/Comedor_01.jpg",
-            pitch: 0,
-            yaw: 0,
+            pitch: -4,
+            yaw: -180,
             hfov: 120,
             hotSpots: [
                 {
-                    pitch: 0,
-                    yaw: -90,
+                    pitch: -1,
+                    yaw: -93,
                     type: "scene",
                     text: "Ver otra zona",
                     sceneId: "comedor_02"
+                },
+                {
+                    pitch: 0,
+                    yaw: 10,
+                    type: "scene",
+                    text: "Volver atrás",
+                    sceneId: "ext_09"
                 }
             ]
             },
@@ -327,6 +376,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         pitch: 0,
                         yaw: 90,
+                        type: "scene",
+                        text: "Avanzar",
+                        sceneId: "comedor_01"
+                    },
+                    {
+                        pitch: 0,
+                        yaw: -90,
                         type: "scene",
                         text: "Vista anterior",
                         sceneId: "comedor_01"
@@ -353,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: "equirectangular",
             panorama: "./360_img/Aula_Magna_01.jpg",
             pitch: 0,
-            yaw: 0,
+            yaw: 145,
             hfov: 120,
             hotSpots: [
                 {
@@ -362,14 +418,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     type: "scene",
                     text: "Ver otra vista",
                     sceneId: "aula_magna_02"
+                },
+                {
+                    pitch: 1,
+                    yaw: 44,
+                    type: "scene",
+                    text: "Volver atrás",
+                    sceneId: "ent_aula_magna_02"
                 }
             ]
         },
         aula_magna_02: {
             type: "equirectangular",
             panorama: "./360_img/Aula_Magna_02.jpg",
-            pitch: 0,
-            yaw: 0,
+            pitch: -3,
+            yaw: -17,
             hfov: 120,
             hotSpots: [
                 {
@@ -392,7 +455,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: "equirectangular",
             panorama: "./360_img/Aula_Magna_03.jpg",
             pitch: 0,
-            yaw: 0,
+            yaw: -3,
             hfov: 120,
             hotSpots: [
                 {
@@ -424,8 +487,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ent_aula_magna: {
             type: "equirectangular",
             panorama: "./360_img/Ent_Aula_Magna_01.jpg",
-            pitch: 0,
-            yaw: 0,
+            pitch: -5,
+            yaw: 185,
             hfov: 120,
             hotSpots: [
                 {
@@ -448,7 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: "equirectangular",
             panorama: "./360_img/Ent_Aula_Magna_02.jpg",
             pitch: 0,
-            yaw: 0,
+            yaw: 15,
             hfov: 120,
             hotSpots: [
                 {
@@ -458,6 +521,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     text: "Entrar al aula magna",
                     sceneId: "aula_magna_01"
                 },
+                {
+                    pitch: -1,
+                    yaw: -165,
+                    type: "scene",
+                    text: "Volver atrás",
+                    sceneId: "ent_aula_magna"
+                }
             ]
         },
         ent_biblio_01: {
@@ -475,7 +545,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     sceneId: "ent_biblio_02"
                 },
                 {
-                    pitch: -10,
+                    pitch: -7,
                     yaw: 187,
                     type: "scene",
                     text: "Salir de la biblioteca",

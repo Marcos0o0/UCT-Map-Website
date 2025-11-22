@@ -1,0 +1,5 @@
+# Forzar barra final en /~mgodoy2025
+RedirectMatch 301 ^/~mgodoy2025$ /~mgodoy2025/
+
+# Redirigir /mgodoy2025 y /mgodoy2025/ a /~mgodoy2025/
+RedirectMatch 301 ^/mgodoy2025/?$ /~mgodoy2025/

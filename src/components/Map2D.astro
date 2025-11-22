@@ -1403,14 +1403,14 @@ function debounce(func, wait) {
 
         // Marcadores de inicio y fin
         const startIcon = L.divIcon({
-            html: '<div class="route-marker route-start"> <img class="w-12 h-12" src="/markers/destination.svg" alt=""> </div>',
+            html: '<div class="route-marker route-start"> <img class="w-12 h-12" src="/~mgodoy2025/markers/destination.svg" alt=""> </div>',
             className: '',
             iconSize: [25, 25],
             iconAnchor: [20, 35]
         });
 
         const endIcon = L.divIcon({
-            html: '<div class="route-marker route-end text-blue-500"> <img class="w-12 h-12" src="/markers/map-pin.svg" alt="">  </div>',
+            html: '<div class="route-marker route-end text-blue-500"> <img class="w-12 h-12" src="/~mgodoy2025/markers/map-pin.svg" alt="">  </div>',
             className: '',
             iconSize: [25, 25],
             iconAnchor: [15, 49]
@@ -1470,31 +1470,31 @@ function debounce(func, wait) {
     });
 
     const customIcons = {
-        edificio: createMarkerWithSVG('../markers/building.svg', '#3B82F6'),
-        libreria: createMarkerWithSVG('/markers/library.svg', '#10B981'),
-        comer: createMarkerWithSVG('/markers/utensils.svg', '#EF4444'),
-        estacionamiento: createMarkerWithSVG('/markers/parking.svg', '#6366F1'),
-        baños: createMarkerWithSVG('/markers/toilet.svg', '#6B7280'),
-        bicicletas: createMarkerWithSVG('/markers/bike.svg', '#F97316'),
-        gym: createMarkerWithSVG('/markers/dumbbell.svg', '#8B5CF6'),
-        calistenia: createMarkerWithSVG('/markers/biceps-flexed.svg', '#EC4899'),
-        impresion: createMarkerWithSVG('/markers/printer.svg', '#14B8A6'),
-        daas: createMarkerWithSVG('/markers/notebook-pen.svg', '#F43F5E'),
-        tesoreria: createMarkerWithSVG('/markers/wallet.svg', '#22C55E')
+        edificio: createMarkerWithSVG('/~mgodoy2025/markers/building.svg', '#3B82F6'),
+        libreria: createMarkerWithSVG('/~mgodoy2025/markers/library.svg', '#10B981'),
+        comer: createMarkerWithSVG('/~mgodoy2025/utensils.svg', '#EF4444'),
+        estacionamiento: createMarkerWithSVG('/~mgodoy2025/markers/parking.svg', '#6366F1'),
+        baños: createMarkerWithSVG('/~mgodoy2025/markers/toilet.svg', '#6B7280'),
+        bicicletas: createMarkerWithSVG('/~mgodoy2025/markers/bike.svg', '#F97316'),
+        gym: createMarkerWithSVG('/~mgodoy2025/markers/dumbbell.svg', '#8B5CF6'),
+        calistenia: createMarkerWithSVG('/~mgodoy2025/markers/biceps-flexed.svg', '#EC4899'),
+        impresion: createMarkerWithSVG('/~mgodoy2025/markers/printer.svg', '#14B8A6'),
+        daas: createMarkerWithSVG('/~mgodoy2025/markers/notebook-pen.svg', '#F43F5E'),
+        tesoreria: createMarkerWithSVG('/~mgodoy2025/markers/wallet.svg', '#22C55E')
     };
 
     const highlightedIcons = {
-        edificio: createHighlightedMarker('../markers/building.svg', '#3B82F6'),
-        libreria: createHighlightedMarker('/markers/library.svg', '#10B981'),
-        comer: createHighlightedMarker('/markers/utensils.svg', '#EF4444'),
-        estacionamiento: createHighlightedMarker('/markers/parking.svg', '#6366F1'),
-        baños: createHighlightedMarker('/markers/toilet.svg', '#6B7280'),
-        bicicletas: createHighlightedMarker('/markers/bike.svg', '#F97316'),
-        gym: createHighlightedMarker('/markers/dumbbell.svg', '#8B5CF6'),
-        calistenia: createHighlightedMarker('/markers/biceps-flexed.svg', '#EC4899'),
-        impresion: createHighlightedMarker('/markers/printer.svg', '#14B8A6'),
-        daas: createHighlightedMarker('/markers/notebook-pen.svg', '#F43F5E'),
-        tesoreria: createHighlightedMarker('/markers/wallet.svg', '#22C55E')
+        edificio: createHighlightedMarker('/~mgodoy2025/markers/building.svg', '#3B82F6'),
+        libreria: createHighlightedMarker('/~mgodoy2025/markers/library.svg', '#10B981'),
+        comer: createHighlightedMarker('/~mgodoy2025/utensils.svg', '#EF4444'),
+        estacionamiento: createHighlightedMarker('/~mgodoy2025/markers/parking.svg', '#6366F1'),
+        baños: createHighlightedMarker('/~mgodoy2025/toilet.svg', '#6B7280'),
+        bicicletas: createHighlightedMarker('/~mgodoy2025/bike.svg', '#F97316'),
+        gym: createHighlightedMarker('/~mgodoy2025/dumbbell.svg', '#8B5CF6'),
+        calistenia: createHighlightedMarker('/~mgodoy2025/markers/biceps-flexed.svg', '#EC4899'),
+        impresion: createHighlightedMarker('/~mgodoy2025/markers/printer.svg', '#14B8A6'),
+        daas: createHighlightedMarker('/~mgodoy2025/notebook-pen.svg', '#F43F5E'),
+        tesoreria: createHighlightedMarker('/~mgodoy2025/markers/wallet.svg', '#22C55E')
     };
 
     const img = new Image();
@@ -1625,7 +1625,7 @@ function debounce(func, wait) {
 
         bounds = [[0, 0], [height, width]];
         
-        L.imageOverlay('/Map.png', bounds).addTo(map);
+        L.imageOverlay('/~mgodoy2025/Map.png', bounds).addTo(map);
         map.fitBounds(bounds);
         map.setMaxBounds(bounds);
         map.setView([height / 2, width / 2], -1);
@@ -2302,7 +2302,7 @@ function updateSelectAllCheckbox() {
         console.error('Error al cargar la imagen del mapa');
     };
 
-    img.src = '/Map.png';
+    img.src = '/~mgodoy2025/Map.png';
 
 
     document.addEventListener('click', (e) => {

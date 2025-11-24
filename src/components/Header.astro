@@ -18,7 +18,7 @@ const isActive = (path: string) => {
       </div>
       <!-- Desktop Navigation -->
       <nav class="hidden md:flex absolute left-1/2 transform -translate-x-1/2">
-        <ul class="flex space-x-8 lg:space-x-12">
+        <ul class="flex space-x-8 lg:space-x-12 pt-1 max-md:pt-5">
           <li>
             <a 
               href="/~mgodoy2025" 
@@ -95,9 +95,9 @@ const isActive = (path: string) => {
         Mapa
       </a>
       <a 
-        href="/information" 
+        href="/~mgodoy2025/information" 
         class={`block py-3 px-4 rounded-lg text-base ${
-          isActive('/information') 
+          isActive('/~mgodoy2025/information') 
             ? 'text-blue-600 font-semibold bg-blue-50' 
             : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50 font-medium transition-all'
         }`}
@@ -105,9 +105,9 @@ const isActive = (path: string) => {
         Información
       </a>
       <a 
-        href="/contact" 
+        href="/~mgodoy2025/contact" 
         class={`block py-3 px-4 rounded-lg text-base ${
-          isActive('/contacts') 
+          isActive('/~mgodoy2025/contacts') 
             ? 'text-blue-600 font-semibold bg-blue-50' 
             : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50 font-medium transition-all'
         }`}

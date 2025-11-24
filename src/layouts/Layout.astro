@@ -11,7 +11,12 @@ const { title, description } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="favicon.webp" />
-
+    <meta name="google-site-verification" content="scESuT31OY-ZR_QoOosmezppqmYob3pjPaT6zNgz03Y" />
+    <title>Mapa UCT - Tour Virtual 360° Universidad Católica de Temuco</title>
+    <meta name="description" content="Explora el campus de la Universidad Católica de Temuco con nuestro mapa interactivo y tour virtual 360°. Encuentra edificios, facultades y servicios.">
+    <meta name="keywords" content="mapa uct, universidad católica temuco, tour virtual uct, campus uct, mapa universidad temuco">
+    <meta property="og:title" content="Mapa UCT - Tour Virtual 360°">
+    <meta property="og:description" content="Explora el campus UCT con mapa interactivo y tour virtual">
     <meta name="description" content={description || "Mapa de Universidad Católica de Temuco"} />
     <title>{title ? `${title} | Mapa UCT` : "Mapa UCT"}</title>
   </head>
@@ -41,3 +46,22 @@ const { title, description } = Astro.props;
 
   @plugin "@midudev/tailwind-animations";
 </style>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollegeOrUniversity",
+  "name": "Universidad Católica de Temuco",
+  "alternateName": "UCT",
+  "url": "https://TU-DOMINIO.cl",
+  "description": "Mapa interactivo y tour virtual 360° del campus UCT",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Avenida Rudecindo Ortega 02950",
+    "addressLocality": "Temuco",
+    "addressRegion": "Región de La Araucanía",
+    "addressCountry": "CL"
+  }
+}
+</script>

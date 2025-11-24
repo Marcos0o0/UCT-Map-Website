@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://https://teclab.uct.cl/~mgodoy2025/sitemap.xml

@@ -14,14 +14,14 @@ const isActive = (path: string) => {
   <div class="max-w-7xl mx-auto px-4 ">
     <div class="flex items-center justify-between h-16 md:h-20">
       <div class="flex items-center">
-        <img src="UCT_Logo_Gris.png" alt="Logo UCT" class="h-10 w-auto md:h-12" />
+        <img src="/~mgodoy2025/UCT_Logo_Gris.png" alt="Logo UCT" class="h-10 w-auto md:h-12" />
       </div>
       <!-- Desktop Navigation -->
       <nav class="hidden md:flex absolute left-1/2 transform -translate-x-1/2">
         <ul class="flex space-x-8 lg:space-x-12">
           <li>
             <a 
-              href="/~mgodoy2025" 
+              href="/~mgodoy2025/" 
               class={`nav-link px-3 py-2 text-sm lg:text-base font-medium relative transition-colors ${
                 isActive('/') 
                   ? 'text-blue-600 font-semibold border-blue-600' 
@@ -33,7 +33,7 @@ const isActive = (path: string) => {
           </li>
           <li>
             <a 
-              href="/#map-section" 
+              href="/~mgodoy2025/#map-section" 
               class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 text-sm lg:text-base font-medium relative transition-colors"
             >
               Mapa
@@ -79,7 +79,7 @@ const isActive = (path: string) => {
   <div id="mobile-menu" class="overflow-hidden max-h-0 opacity-0 md:hidden bg-white/95 backdrop-blur-lg border-b border-gray-100 shadow-lg transition-all duration-300 ease-in-out">
     <div class="px-4 py-6 space-y-4">
       <a 
-        href="/" 
+        href="/~mgodoy2025/" 
         class={`block py-3 px-4 rounded-lg text-base ${
           isActive('/') 
             ? 'text-blue-600 font-semibold bg-blue-50' 
@@ -88,14 +88,16 @@ const isActive = (path: string) => {
       >
         Inicio
       </a>
+
       <a 
-        href="#" 
+        href="/~mgodoy2025/#map-section" 
         class="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 py-3 px-4 rounded-lg text-base font-medium transition-all"
       >
         Mapa
       </a>
+      
       <a 
-        href="/information" 
+        href="/~mgodoy2025/information" 
         class={`block py-3 px-4 rounded-lg text-base ${
           isActive('/information') 
             ? 'text-blue-600 font-semibold bg-blue-50' 
@@ -104,8 +106,9 @@ const isActive = (path: string) => {
       >
         Información
       </a>
+
       <a 
-        href="/contact" 
+        href="/~mgodoy2025/contact" 
         class={`block py-3 px-4 rounded-lg text-base ${
           isActive('/contacts') 
             ? 'text-blue-600 font-semibold bg-blue-50' 
@@ -114,6 +117,7 @@ const isActive = (path: string) => {
       >
         Contacto
       </a>
+
     </div>
   </div>
 </header>

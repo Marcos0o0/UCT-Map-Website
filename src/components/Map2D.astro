@@ -444,7 +444,7 @@ button:focus-visible {
 </style>
 
 <!-- Título de la sección -->
-    <div class="text-center animate-[slideDown_0.6s_ease-out_0.1s_both] sm:mb-4">
+    <div class="text-center animate-[slideDown_0.6s_ease-out_0.1s_both] sm:mb-4 pb-2">
       <h2 class="text-3xl lg:text-5xl font-black mb-4 gradient-text animation-gradient">
         Mapa interactivo
       </h2>
@@ -578,6 +578,12 @@ button:focus-visible {
                     </label>
                 </div>
             </details>
+            <button id="toggle-map-format-mobile" class="w-full mt-3 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition font-medium flex items-center justify-center gap-2 text-sm border-2 border-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span id="format-text-mobile">Modo: SVG</span>
+            </button>
         </div>
     </div>
 </div>
@@ -609,6 +615,14 @@ button:focus-visible {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
             Mi Ubicación
+        </button>
+
+        <!-- NUEVO: Toggle SVG/PNG -->
+        <button id="toggle-map-format" class="w-full mt-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition font-medium flex items-center justify-center gap-2 text-xs border border-gray-300">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <span id="format-text">Modo: SVG</span>
         </button>
     </div>
 
@@ -946,10 +960,8 @@ function debounce(func, wait) {
             'este7': [0, 0],
             'auxiliar1': [0, 0],
             'auxiliar2': [0, 0],
-            'auxiliar3': [0, 0],
-            'auxiliar4': [0, 0],
-            'auxiliar5': [0, 0],
-            'auxiliar6': [0, 0],
+            'auxiliar10': [0, 0],
+            'auxiliar11': [0, 0],
             'central1': [0, 0],
             'central2': [0, 0],
             'central3': [0, 0],
@@ -982,10 +994,8 @@ function debounce(func, wait) {
             'norte2': ['norte1'],
             'auxiliar1': ['central2', 'este1'],
             'auxiliar2': ['central2', 'central3'],
-            'auxiliar3': ['este3', 'este4'],
-            'auxiliar4': ['este5', 'este4'],
-            'auxiliar5': ['norte1', 'central4'],
-            'auxiliar6': ['oeste3', 'oeste1'],
+            'auxiliar10': ['este2', 'auxiliar11'],
+            'auxiliar11': ['auxiliar10'],
         }
     };
 
@@ -1549,43 +1559,81 @@ function debounce(func, wait) {
     });
 }
 
+// ==========================================
+// TOGGLE SVG/PNG
+// ==========================================
+let currentMapFormat = 'svg'; // 'svg' o 'png'
+let mapOverlay = null;
+
+function toggleMapFormat() {
+    currentMapFormat = currentMapFormat === 'svg' ? 'jpg' : 'svg';
+    
+    const newImagePath = currentMapFormat === 'svg' 
+        ? '/Mapa UCT.svg' 
+        : '/Mapa UCT.jpg'; // Asegúrate de tener este archivo
+    
+    // Actualizar overlay del mapa
+    if (map && mapOverlay) {
+        map.removeLayer(mapOverlay);
+        mapOverlay = L.imageOverlay(newImagePath, bounds).addTo(map);
+        
+        // Mantener la vista actual
+        const currentZoom = map.getZoom();
+        const currentCenter = map.getCenter();
+        map.setView(currentCenter, currentZoom);
+    }
+    
+    // Actualizar texto del botón
+    const formatText = currentMapFormat === 'svg' ? 'SVG' : 'JPG';
+    document.querySelectorAll('[id^="format-text"]').forEach(el => {
+        el.textContent = `Modo: ${formatText}`;
+    });
+    
+    // Guardar preferencia en localStorage
+    localStorage.setItem('mapFormat', currentMapFormat);
+    
+    // Toast de confirmación
+    showToast(`Mapa cambiado a ${formatText}`, 'success', 2000);
+}
+
+// Cargar preferencia guardada
+const savedFormat = localStorage.getItem('mapFormat');
+if (savedFormat) {
+    currentMapFormat = savedFormat;
+}
+
     img.onload = function() {
         width = this.naturalWidth;
         height = this.naturalHeight;
         
-        mainEntrance.pos = [height * 0.200, width * 0.210];
+        mainEntrance.pos = [height * 0.297, width * 0.306];
         pathNetwork.nodes['entrada'] = mainEntrance.pos;
-        pathNetwork.nodes['entrada2'] = [height * 0.298, width * 0.290];
-        pathNetwork.nodes['oeste1'] = [height * 0.320, width * 0.121];
-        pathNetwork.nodes['oeste2'] = [height * 0.434, width * 0.200];
-        pathNetwork.nodes['oeste3'] = [height * 0.415, width * 0.276];
-        pathNetwork.nodes['oeste4'] = [height * 0.447, width * 0.304];
+        pathNetwork.nodes['entrada2'] = [height * 0.357, width * 0.368];
+        pathNetwork.nodes['oeste1'] = [height * 0.364, width * 0.235];
+        pathNetwork.nodes['oeste2'] = [height * 0.459, width * 0.306];
+        pathNetwork.nodes['oeste3'] = [height * 0.448, width * 0.340];
+        pathNetwork.nodes['oeste4'] = [height * 0.465, width * 0.368];
         pathNetwork.nodes['oeste5'] = [height * 0.601, width * 0.426];
         pathNetwork.nodes['oeste6'] = [height * 0.732, width * 0.513];
-        pathNetwork.nodes['oeste7'] = [height * 0.745, width * 0.484];
-        pathNetwork.nodes['oeste8'] = [height * 0.765, width * 0.524];
-        pathNetwork.nodes['oeste9'] = [height * 0.505, width * 0.348];
-        pathNetwork.nodes['este1'] = [height * 0.434, width * 0.512];
-        pathNetwork.nodes['este2'] = [height * 0.499, width * 0.560];
-        pathNetwork.nodes['este3'] = [height * 0.481, width * 0.613];
-        pathNetwork.nodes['este4'] = [height * 0.567, width * 0.666];
-        pathNetwork.nodes['este5'] = [height * 0.622, width * 0.702];
-        pathNetwork.nodes['este6'] = [height * 0.440, width * 0.630];
-        pathNetwork.nodes['este7'] = [height * 0.366, width * 0.576];
-        pathNetwork.nodes['central1'] = [height * 0.413, width * 0.372];
-        pathNetwork.nodes['central2'] = [height * 0.459, width * 0.411];
-        pathNetwork.nodes['central3'] = [height * 0.551, width * 0.478];
-        pathNetwork.nodes['central4'] = [height * 0.692, width * 0.588];
-        pathNetwork.nodes['norte1'] = [height * 0.798, width * 0.697];
-        pathNetwork.nodes['norte2'] = [height * 0.708, width * 0.849];
-        pathNetwork.nodes['auxiliar1'] = [height * 0.470, width * 0.443];
+        pathNetwork.nodes['este1'] = [height * 0.493, width * 0.536];
+        pathNetwork.nodes['este2'] = [height * 0.482, width * 0.571];
+        pathNetwork.nodes['este3'] = [height * 0.505, width * 0.585];
+        pathNetwork.nodes['este4'] = [height * 0.533, width * 0.604];
+        pathNetwork.nodes['este5'] = [height * 0.575, width * 0.635];
+        pathNetwork.nodes['central1'] = [height * 0.436, width * 0.418];
+        pathNetwork.nodes['central2'] = [height * 0.474, width * 0.450];
+        pathNetwork.nodes['central3'] = [height * 0.532, width * 0.487];
+        pathNetwork.nodes['central4'] = [height * 0.578, width * 0.523];
+        pathNetwork.nodes['norte1'] = [height * 0.628, width * 0.558];
+        pathNetwork.nodes['norte2'] = [height * 0.681, width * 0.600];
+        pathNetwork.nodes['auxiliar1'] = [height * 0.454, width * 0.509];
         pathNetwork.nodes['auxiliar2'] = [height * 0.496, width * 0.472];
-        pathNetwork.nodes['auxiliar3'] = [height * 0.534, width * 0.647];
-        pathNetwork.nodes['auxiliar4'] = [height * 0.598, width * 0.691];
-        pathNetwork.nodes['auxiliar5'] = [height * 0.778, width * 0.662];
-        pathNetwork.nodes['auxiliar6'] = [height * 0.424, width * 0.258];
+        pathNetwork.nodes['auxiliar10'] = [height * 0.463, width * 0.584];
+        pathNetwork.nodes['auxiliar11'] = [height * 0.405, width * 0.542];
 
         const img = new Image();
+
+        
     
 
         // DETECTAR SI ES MÓVIL O DESKTOP
@@ -1610,8 +1658,8 @@ function debounce(func, wait) {
         map = L.map(mapElementId, {
             crs: L.CRS.Simple,
             maxBoundsViscosity: 1.0,
-            minZoom: -0.4,
-            maxZoom: 0.7,
+            minZoom: 2.4,
+            maxZoom: 6,
             zoomControl: false,
             tap: true,
             touchZoom: true,
@@ -1625,7 +1673,14 @@ function debounce(func, wait) {
 
         bounds = [[0, 0], [height, width]];
         
-        L.imageOverlay('/Map.png', bounds).addTo(map);
+        const initialMapPath = currentMapFormat === 'svg' ? '/Mapa UCT.svg' : '/Mapa UCT.jpg';
+        mapOverlay = L.imageOverlay(initialMapPath, bounds).addTo(map);
+
+        const initialFormatText = currentMapFormat === 'svg' ? 'SVG' : 'JPG';
+        document.querySelectorAll('[id^="format-text"]').forEach(el => {
+            el.textContent = `Modo: ${initialFormatText}`;
+        });
+
         map.fitBounds(bounds);
         map.setMaxBounds(bounds);
         map.setView([height / 2, width / 2], -1);
@@ -1679,28 +1734,28 @@ function debounce(func, wait) {
         };
 
         const predefinedMarkers = [
-            { pos: [height * 0.277, width * 0.323], name: "Edificio 1", type: "edificio", description: "Edificio de informaciones y asistentes sociales", schedule: schedules.weekdays, contact: "Ext. 1101", services: ["WiFi", "Enchufes", "Accesibilidad"], capacity: "300 personas" },
-            { pos: [height * 0.394, width * 0.407], name: "Edificio 2", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1102", services: ["WiFi", "Baños", "Sala de estar"], capacity: "400 personas" },
-            { pos: [height * 0.443, width * 0.549], name: "Edificio 3", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1103", services: ["WiFi", "Baños", "Sala de estar"], capacity: "350 personas" },
-            { pos: [height * 0.504, width * 0.487], name: "Biblioteca", type: "libreria", description: "Venta de libros y sala de estudio", schedule: schedules.biblioteca, contact: "Ext. 1201 | biblioteca@uct.cl", services: ["WiFi", "Computadores", "Impresora", "Sala de estudio"], capacity: "150 personas" },
-            { pos: [height * 0.533, width * 0.667], name: "Servicio de impresiones", type: "impresion", description: "Libreria con servicio de impresiones", schedule: schedules.weekdays, contact: "Ext. 1301", services: ["Impresión B/N", "Impresión Color", "Anillado", "Fotocopias"], capacity: "20 personas" },
-            { pos: [height * 0.59, width * 0.705], name: "DAAS", type: "daas", description: "Dirección de Acompañamiento Académico y Socioemocional", schedule: schedules.admin, contact: "Ext. 1401 | daas@uct.cl", services: ["Orientación académica", "Apoyo psicológico", "Tutorías"], capacity: "50 personas" },
-            { pos: [height * 0.77, width * 0.88], name: "Tesoreria", type: "tesoreria", description: "Gestión de pagos y trámites financieros", schedule: schedules.admin, contact: "Ext. 1501 | tesoreria@uct.cl", services: ["Pagos", "Becas", "Certificados"], capacity: "30 personas" },
-            { pos: [height * 0.92, width * 0.575], name: "Edificio 12", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1112", services: ["WiFi", "Baños", "Sala de estar"], capacity: "300 personas" },
-            { pos: [height * 0.842, width * 0.515], name: "Edificio 13", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1113", services: ["WiFi", "Baños", "Sala de estar"], capacity: "280 personas" },
-            { pos: [height * 0.767, width * 0.45], name: "Edificio 14", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1114", services: ["WiFi", "Baños", "Sala de estar"], capacity: "320 personas" },
-            { pos: [height * 0.654, width * 0.376], name: "Edificio 15", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1115", services: ["WiFi", "Baños", "Sala de estar", "Gimnasio"], capacity: "400 personas" },
-            { pos: [height * 0.497, width * 0.255], name: "Edificio 16", type: "edificio", description: "Edificio de carreras técnicas", schedule: schedules.weekdays, contact: "Ext. 1116", services: ["WiFi", "Laboratorios", "Talleres"], capacity: "250 personas" },
-            { pos: [height * 0.418, width * 0.233], name: "Edificio 17", type: "edificio", description: "Edificio con apartado de informática y enfermería", schedule: schedules.weekdays, contact: "Ext. 1117 | enfermeria@uct.cl", services: ["WiFi", "Lab. Informática", "Enfermería"], capacity: "200 personas" },
-            { pos: [height * 0.36, width * 0.597], name: "Edificio 21", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1121", services: ["WiFi", "Baños", "Sala de estar"], capacity: "350 personas" },
-            { pos: [height * 0.35, width * 0.47], name: "Biblioteca Central", type: "libreria", description: "Recursos académicos y salas de estudio", schedule: schedules.biblioteca, contact: "Ext. 1202 | bibcentral@uct.cl", services: ["WiFi", "Computadores", "Salas grupales", "Libros digitales"], capacity: "200 personas" },
-            { pos: [height * 0.49, width * 0.64], name: "Cafetería", type: "comer", description: "Cafetería para todo público", schedule: schedules.cafeteria, contact: "Sin teléfono", services: ["Café", "Snacks", "Almuerzos", "WiFi"], capacity: "80 personas" },
-            { pos: [height * 0.79, width * 0.67], name: "Comedor", type: "comer", description: "Comedor piso 1", schedule: schedules.cafeteria, contact: "Ext. 1601", services: ["Menú del día", "Cafetería", "Microondas"], capacity: "120 personas" },
-            { pos: [height * 0.757, width * 0.81], name: "Estacionamiento", type: "estacionamiento", description: "Zona de estacionamiento para todo público", schedule: null, contact: "Seguridad: Ext. 1700", services: ["Espacios cubiertos", "Vigilancia 24/7"], capacity: "150 vehículos" },
-            { pos: [height * 0.8, width * 0.77], name: "Baños Públicos", type: "baños", description: "Baños para todo público", schedule: null, contact: "Mantenimiento: Ext. 1800", services: ["Accesibilidad", "Agua caliente"], capacity: "20 personas" },
-            { pos: [height * 0.42, width * 0.181], name: "Estacionamiento de Bicicletas", type: "bicicletas", description: "Zona segura para estacionar bicicletas", schedule: null, contact: "Seguridad: Ext. 1700", services: ["Techado", "Vigilancia", "Bomba de aire"], capacity: "50 bicicletas" },
-            { pos: [height * 0.63, width * 0.395], name: "Gimnasio", type: "gym", description: "Gimnasio en edificio 15", schedule: schedules.gym, contact: "Sin contacto | gimnasio15@uct.cl", services: ["Máquinas", "Pesas libres", "Duchas", "Casilleros"], capacity: "60 personas" },
-            { pos: [height * 0.56, width * 0.64], name: "Zona de Calistenia", type: "calistenia", description: "Área al aire libre para ejercicios", schedule: null, contact: "Sin contacto", services: ["Barras", "Paralelas", "Aire libre"], capacity: "30 personas" }
+            { pos: [height * 0.341, width * 0.385], name: "Edificio 1", type: "edificio", description: "Edificio de informaciones y asistentes sociales", schedule: schedules.weekdays, contact: "Ext. 1101", services: ["WiFi", "Enchufes", "Accesibilidad"], capacity: "300 personas" },
+            { pos: [height * 0.429, width * 0.442], name: "Edificio 2", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1102", services: ["WiFi", "Baños", "Sala de estar"], capacity: "400 personas" },
+            { pos: [height * 0.463, width * 0.540], name: "Edificio 3", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1103", services: ["WiFi", "Baños", "Sala de estar"], capacity: "350 personas" },
+            { pos: [height * 0.499, width * 0.500], name: "Biblioteca", type: "libreria", description: "Venta de libros y sala de estudio", schedule: schedules.biblioteca, contact: "Ext. 1201 | biblioteca@uct.cl", services: ["WiFi", "Computadores", "Impresora", "Sala de estudio"], capacity: "150 personas" },
+            { pos: [height * 0.522, width * 0.612], name: "Servicio de impresiones", type: "impresion", description: "Libreria con servicio de impresiones", schedule: schedules.weekdays, contact: "Ext. 1301", services: ["Impresión B/N", "Impresión Color", "Anillado", "Fotocopias"], capacity: "20 personas" },
+            { pos: [height * 0.630, width * 0.656], name: "DAAS", type: "daas", description: "Dirección de Acompañamiento Académico y Socioemocional", schedule: schedules.admin, contact: "Ext. 1401 | daas@uct.cl", services: ["Orientación académica", "Apoyo psicológico", "Tutorías"], capacity: "50 personas" },
+            { pos: [height * 0.677, width * 0.763], name: "Tesoreria", type: "tesoreria", description: "Gestión de pagos y trámites financieros", schedule: schedules.admin, contact: "Ext. 1501 | tesoreria@uct.cl", services: ["Pagos", "Becas", "Certificados"], capacity: "30 personas" },
+            { pos: [height * 0.774, width * 0.543], name: "Edificio 12", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1112", services: ["WiFi", "Baños", "Sala de estar"], capacity: "300 personas" },
+            { pos: [height * 0.731, width * 0.509], name: "Edificio 13", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1113", services: ["WiFi", "Baños", "Sala de estar"], capacity: "280 personas" },
+            { pos: [height * 0.678, width * 0.468], name: "Edificio 14", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1114", services: ["WiFi", "Baños", "Sala de estar"], capacity: "320 personas" },
+            { pos: [height * 0.615, width * 0.424], name: "Edificio 15", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1115", services: ["WiFi", "Baños", "Sala de estar", "Gimnasio"], capacity: "400 personas" },
+            { pos: [height * 0.504, width * 0.343], name: "Edificio 16", type: "edificio", description: "Edificio de carreras técnicas", schedule: schedules.weekdays, contact: "Ext. 1116", services: ["WiFi", "Laboratorios", "Talleres"], capacity: "250 personas" },
+            { pos: [height * 0.441, width * 0.323], name: "Edificio 17", type: "edificio", description: "Edificio con apartado de informática y enfermería", schedule: schedules.weekdays, contact: "Ext. 1117 | enfermeria@uct.cl", services: ["WiFi", "Lab. Informática", "Enfermería"], capacity: "200 personas" },
+            { pos: [height * 0.397, width * 0.562], name: "Edificio 21", type: "edificio", description: "Edificio con salas de clase, baños y sala de estar", schedule: schedules.weekdays, contact: "Ext. 1121", services: ["WiFi", "Baños", "Sala de estar"], capacity: "350 personas" },
+            { pos: [height * 0.403, width * 0.477], name: "Biblioteca Central", type: "libreria", description: "Recursos académicos y salas de estudio", schedule: schedules.biblioteca, contact: "Ext. 1202 | bibcentral@uct.cl", services: ["WiFi", "Computadores", "Salas grupales", "Libros digitales"], capacity: "200 personas" },
+            { pos: [height * 0.490, width * 0.592], name: "Cafetería", type: "comer", description: "Cafetería para todo público", schedule: schedules.cafeteria, contact: "Sin teléfono", services: ["Café", "Snacks", "Almuerzos", "WiFi"], capacity: "80 personas" },
+            { pos: [height * 0.701, width * 0.618], name: "Comedor", type: "comer", description: "Comedor piso 1", schedule: schedules.cafeteria, contact: "Ext. 1601", services: ["Menú del día", "Cafetería", "Microondas"], capacity: "120 personas" },
+            { pos: [height * 0.668, width * 0.707], name: "Estacionamiento", type: "estacionamiento", description: "Zona de estacionamiento para todo público", schedule: null, contact: "Seguridad: Ext. 1700", services: ["Espacios cubiertos", "Vigilancia 24/7"], capacity: "150 vehículos" },
+            { pos: [height * 0.684, width * 0.693], name: "Baños Públicos", type: "baños", description: "Baños para todo público", schedule: null, contact: "Mantenimiento: Ext. 1800", services: ["Accesibilidad", "Agua caliente"], capacity: "20 personas" },
+            { pos: [height * 0.446, width * 0.280], name: "Estacionamiento de Bicicletas", type: "bicicletas", description: "Zona segura para estacionar bicicletas", schedule: null, contact: "Seguridad: Ext. 1700", services: ["Techado", "Vigilancia", "Bomba de aire"], capacity: "50 bicicletas" },
+            { pos: [height * 0.619, width * 0.443], name: "Gimnasio", type: "gym", description: "Gimnasio en edificio 15", schedule: schedules.gym, contact: "Sin contacto | gimnasio15@uct.cl", services: ["Máquinas", "Pesas libres", "Duchas", "Casilleros"], capacity: "60 personas" },
+            { pos: [height * 0.539, width * 0.594], name: "Zona de Calistenia", type: "calistenia", description: "Área al aire libre para ejercicios", schedule: null, contact: "Sin contacto", services: ["Barras", "Paralelas", "Aire libre"], capacity: "30 personas" }
         ];
 
         const markersByType = {};
@@ -1719,6 +1774,100 @@ function debounce(func, wait) {
             
             const leafletMarker = L.marker(marker.pos, { icon })
     .addTo(map);
+
+    // ==========================================
+// VISUALIZACIÓN DE NODOS DE RUTA (DESARROLLO)
+// ==========================================
+// Descomentar para ver y ajustar nodos de ruta
+
+const showRouteNodes = false; // Cambiar a false para ocultar
+
+if (showRouteNodes) {
+    Object.entries(pathNetwork.nodes).forEach(([nodeName, nodePos]) => {
+        if (!nodePos || !nodePos[0]) return;
+        
+        // Crear marcador visual para el nodo
+        const nodeIcon = L.divIcon({
+            html: `
+                <div style="
+                    width: 20px; 
+                    height: 20px; 
+                    background: #FF6B6B; 
+                    border: 3px solid white; 
+                    border-radius: 50%; 
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 10px;
+                    font-weight: bold;
+                    color: white;
+                "></div>
+            `,
+            className: '',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+        
+        const nodeMarker = L.marker(nodePos, { icon: nodeIcon });
+        
+        // Popup con información del nodo
+        nodeMarker.bindPopup(`
+            <div style="padding: 8px; min-width: 200px;">
+                <h4 style="margin: 0 0 8px 0; color: #FF6B6B; font-weight: bold;">
+                    🔴 ${nodeName}
+                </h4>
+                <div style="font-family: monospace; font-size: 11px; background: #f5f5f5; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+                    <div><strong>Coords:</strong></div>
+                    <div>[${Math.round(nodePos[0])}, ${Math.round(nodePos[1])}]</div>
+                    <div style="margin-top: 4px;"><strong>Código:</strong></div>
+                    <div style="color: #2563eb;">
+                        pathNetwork.nodes['${nodeName}'] = <br>
+                        [height * ${(nodePos[0] / height).toFixed(3)}, <br>
+                        width * ${(nodePos[1] / width).toFixed(3)}];
+                    </div>
+                </div>
+                <div style="font-size: 10px; color: #666;">
+                    <strong>Conexiones:</strong><br>
+                    ${(pathNetwork.edges[nodeName] || []).join(', ') || 'Ninguna'}
+                </div>
+            </div>
+        `);
+        
+        // Click en el nodo muestra info en consola
+        nodeMarker.on('click', function() {
+            console.log('═══════════════════════════════════');
+            console.log('🔴 NODO DE RUTA:', nodeName);
+            console.log('Posición actual:', nodePos);
+            console.log('Código actual:');
+            console.log(`pathNetwork.nodes['${nodeName}'] = [height * ${(nodePos[0] / height).toFixed(3)}, width * ${(nodePos[1] / width).toFixed(3)}];`);
+            console.log('Conexiones:', pathNetwork.edges[nodeName] || []);
+            console.log('═══════════════════════════════════');
+        });
+        
+        nodeMarker.addTo(map);
+    });
+    
+    console.log('✅ Nodos de ruta visibles. Para ocultarlos, cambia showRouteNodes = false');
+}
+
+// Click en cualquier parte del mapa para obtener coordenadas
+map.on('click', function(e) {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+    
+    const relY = lat / height;
+    const relX = lng / width;
+    
+    console.log('═══════════════════════════════════');
+    console.log('📍 CLICK EN MAPA:');
+    console.log('Pixel coords:', `[${Math.round(lat)}, ${Math.round(lng)}]`);
+    console.log('Código para nodo:');
+    console.log(`pathNetwork.nodes['nuevoNodo'] = [height * ${relY.toFixed(3)}, width * ${relX.toFixed(3)}];`);
+    console.log('Código para marcador:');
+    console.log(`{ pos: [height * ${relY.toFixed(3)}, width * ${relX.toFixed(3)}], name: "Nuevo Lugar", type: "edificio", description: "..." },`);
+    console.log('═══════════════════════════════════');
+});
 
 leafletMarker.on('click', function() {
     const markerPos = this.getLatLng ? [this.getLatLng().lat, this.getLatLng().lng] : marker.pos;
@@ -2302,7 +2451,7 @@ function updateSelectAllCheckbox() {
         console.error('Error al cargar la imagen del mapa');
     };
 
-    img.src = '/Map.png';
+    img.src = '/Mapa UCT.svg';
 
 
     document.addEventListener('click', (e) => {
@@ -2377,6 +2526,9 @@ if (mobilePanel && mapContainer) {
     observer.observe(mobilePanel, { attributes: true, attributeFilter: ['class'] });
 }
 
+
+document.getElementById('toggle-map-format')?.addEventListener('click', toggleMapFormat);
+document.getElementById('toggle-map-format-mobile')?.addEventListener('click', toggleMapFormat);
 
 
 });

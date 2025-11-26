@@ -68,6 +68,20 @@ const isActive = (path: string) => {
               Contacto
             </a>
           </li>
+
+          <li>
+            <a 
+              href={`${base}resenas`} 
+              class={`nav-link px-3 py-2 text-sm lg:text-base font-medium relative transition-colors ${
+                isActive('/resenas') 
+                  ? 'text-blue-600 font-semibold border-blue-600' 
+                  : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
+              Reseñas
+            </a>
+          </li>
+
         </ul>
       </nav>
 
@@ -122,6 +136,17 @@ const isActive = (path: string) => {
         }`}
       >
         Contacto
+      </a>
+
+      <a 
+        href={`${base}resenas`} 
+        class={`block py-3 px-4 rounded-lg text-base ${
+          isActive('/resenas') 
+            ? 'text-blue-600 font-semibold bg-blue-50' 
+            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50 font-medium transition-all'
+        }`}
+      >
+        Reseñas
       </a>
 
     </div>

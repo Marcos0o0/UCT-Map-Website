@@ -1,0 +1,376 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Reseñas - Campus UCT">
+  <main class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 pt-32">
+    <div class="max-w-6xl mx-auto">
+      
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+          Reseñas del Campus
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Cuéntanos tu experiencia y ayúdanos a mejorar
+        </p>
+      </div>
+
+      <!-- Loading para estadísticas -->
+      <div id="loading-stats" class="bg-white rounded-2xl shadow-lg p-8 mb-12">
+        <div class="flex justify-center items-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <span class="ml-4 text-gray-600">Cargando estadísticas...</span>
+        </div>
+      </div>
+
+      <!-- Estadísticas (se llena dinámicamente) -->
+      <div id="estadisticas-container" class="hidden"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Formulario -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Deja tu reseña</h2>
+            
+            <form id="form-resena" class="space-y-4">
+              
+              <!-- Nombre -->
+              <div>
+                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+                  Tu nombre *
+                </label>
+                <input 
+                  type="text" 
+                  id="nombre" 
+                  name="nombre" 
+                  required
+                  maxlength="100"
+                  class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                  placeholder="Juan Pérez"
+                />
+              </div>
+
+              <!-- Calificación -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Calificación *
+                </label>
+                <div class="flex gap-2">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      type="button"
+                      class="star-btn w-12 h-12 rounded-lg border-2 border-gray-300 hover:border-yellow-400 transition-all hover:scale-110"
+                      data-value={star}
+                    >
+                      <svg class="w-8 h-8 mx-auto text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+                <input type="hidden" id="calificacion" name="calificacion" required />
+              </div>
+
+              <!-- Comentario -->
+              <div>
+                <label for="comentario" class="block text-sm font-medium text-gray-700 mb-2">
+                  ¿En qué podemos mejorar?
+                </label>
+                <textarea 
+                  id="comentario" 
+                  name="comentario" 
+                  rows="4"
+                  maxlength="500"
+                  class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition resize-none"
+                  placeholder="Comparte tu experiencia..."
+                ></textarea>
+                <p class="text-xs text-gray-500 mt-1">Máximo 500 caracteres</p>
+              </div>
+
+              <!-- Botón -->
+              <button 
+                type="submit"
+                class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Enviar reseña
+              </button>
+
+              <p class="text-xs text-gray-500 text-center">
+                Tu reseña será revisada antes de publicarse
+              </p>
+            </form>
+
+            <!-- Mensajes -->
+            <div id="mensaje" class="hidden mt-4 p-4 rounded-lg"></div>
+          </div>
+        </div>
+
+        <!-- Lista de Reseñas -->
+        <div class="lg:col-span-2">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            Reseñas recientes <span id="total-resenas">(0)</span>
+          </h2>
+
+          <!-- Loading -->
+          <div id="loading-resenas" class="bg-white rounded-2xl shadow-lg p-12 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="text-gray-600 mt-4">Cargando reseñas...</p>
+          </div>
+
+          <!-- Contenedor de reseñas -->
+          <div id="resenas-container" class="hidden space-y-4"></div>
+
+          <!-- Estado vacío -->
+          <div id="empty-state" class="hidden bg-white rounded-2xl shadow-lg p-12 text-center">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+            <p class="text-gray-500 text-lg">Aún no hay reseñas. ¡Sé el primero en dejar una!</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const API_URL = 'https://teclab.uct.cl/~mgodoy2025/api';
+  let calificacionSeleccionada = 0;
+
+  // Cargar datos al iniciar la página
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarEstadisticas();
+    cargarResenas();
+    inicializarFormulario();
+  });
+
+  async function cargarEstadisticas() {
+    try {
+      const response = await fetch(`${API_URL}/estadisticas-resenas.php`);
+      const data = await response.json();
+
+      const loadingStats = document.getElementById('loading-stats');
+      const statsContainer = document.getElementById('estadisticas-container');
+
+      if (data.success && data.estadisticas.total > 0) {
+        const stats = data.estadisticas;
+        const promedioRedondeado = Math.round(stats.promedio * 10) / 10;
+
+        statsContainer.innerHTML = `
+          <div class="bg-white rounded-2xl shadow-lg p-8 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              
+              <!-- Promedio -->
+              <div class="text-center">
+                <div class="text-6xl font-black text-blue-600 mb-2">
+                  ${promedioRedondeado}
+                </div>
+                <div class="flex justify-center gap-1 mb-2">
+                  ${[1, 2, 3, 4, 5].map(star => `
+                    <svg class="w-6 h-6 ${star <= Math.round(stats.promedio) ? 'text-yellow-400' : 'text-gray-300'}" 
+                         fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  `).join('')}
+                </div>
+                <p class="text-gray-600">${stats.total} reseñas</p>
+              </div>
+
+              <!-- Distribución -->
+              <div class="md:col-span-2">
+                <h3 class="font-bold text-gray-900 mb-4">Distribución de calificaciones</h3>
+                ${[5, 4, 3, 2, 1].map(stars => {
+                  const count = stats[`estrellas_${stars}`] || 0;
+                  const percentage = stats.total > 0 ? (count / stats.total) * 100 : 0;
+                  return `
+                    <div class="flex items-center gap-3 mb-2">
+                      <span class="text-sm font-medium text-gray-700 w-8">${stars}★</span>
+                      <div class="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-yellow-400 transition-all duration-500" style="width: ${percentage}%"></div>
+                      </div>
+                      <span class="text-sm text-gray-600 w-12 text-right">${count}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+
+        loadingStats.classList.add('hidden');
+        statsContainer.classList.remove('hidden');
+      } else {
+        loadingStats.classList.add('hidden');
+      }
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+      document.getElementById('loading-stats').classList.add('hidden');
+    }
+  }
+
+  async function cargarResenas() {
+    try {
+      const response = await fetch(`${API_URL}/listar-resenas.php`);
+      const data = await response.json();
+
+      const loadingResenas = document.getElementById('loading-resenas');
+      const resenasContainer = document.getElementById('resenas-container');
+      const emptyState = document.getElementById('empty-state');
+      const totalResenas = document.getElementById('total-resenas');
+
+      loadingResenas.classList.add('hidden');
+
+      if (data.success && data.resenas.length > 0) {
+        totalResenas.textContent = `(${data.resenas.length})`;
+        
+        resenasContainer.innerHTML = data.resenas.map(resena => `
+          <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h3 class="font-bold text-gray-900">${resena.nombre}</h3>
+                <p class="text-sm text-gray-500">
+                  ${new Date(resena.fecha).toLocaleDateString('es-CL', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </p>
+              </div>
+              <div class="flex gap-1">
+                ${[1, 2, 3, 4, 5].map(star => `
+                  <svg class="w-5 h-5 ${star <= resena.calificacion ? 'text-yellow-400' : 'text-gray-300'}" 
+                       fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                `).join('')}
+              </div>
+            </div>
+            ${resena.comentario ? `<p class="text-gray-700">${resena.comentario}</p>` : ''}
+          </div>
+        `).join('');
+
+        resenasContainer.classList.remove('hidden');
+      } else {
+        emptyState.classList.remove('hidden');
+      }
+    } catch (error) {
+      console.error('Error cargando reseñas:', error);
+      document.getElementById('loading-resenas').classList.add('hidden');
+      document.getElementById('empty-state').classList.remove('hidden');
+    }
+  }
+
+  function inicializarFormulario() {
+    // Sistema de estrellas
+    const starBtns = document.querySelectorAll('.star-btn');
+    const calificacionInput = document.getElementById('calificacion');
+
+    starBtns.forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        calificacionSeleccionada = index + 1;
+        calificacionInput.value = calificacionSeleccionada.toString();
+
+        starBtns.forEach((star, i) => {
+          const svg = star.querySelector('svg');
+          if (svg) {
+            if (i < calificacionSeleccionada) {
+              svg.classList.remove('text-gray-300');
+              svg.classList.add('text-yellow-400');
+              star.classList.add('border-yellow-400', 'bg-yellow-50');
+              star.classList.remove('border-gray-300');
+            } else {
+              svg.classList.add('text-gray-300');
+              svg.classList.remove('text-yellow-400');
+              star.classList.remove('border-yellow-400', 'bg-yellow-50');
+              star.classList.add('border-gray-300');
+            }
+          }
+        });
+      });
+    });
+
+    // Envío del formulario
+    const form = document.getElementById('form-resena');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (calificacionSeleccionada === 0) {
+        mostrarMensaje('Por favor selecciona una calificación', 'error');
+        return;
+      }
+
+      const formData = new FormData(form);
+      const data = {
+        nombre: formData.get('nombre'),
+        calificacion: calificacionSeleccionada,
+        comentario: formData.get('comentario')
+      };
+
+      try {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando...';
+          
+        const response = await fetch(`${API_URL}/crear-resena.php`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      
+        const result = await response.json();
+
+        if (result.success) {
+          mostrarMensaje(result.message, 'success');
+          form.reset();
+          calificacionSeleccionada = 0;
+          
+          // Reset estrellas
+          starBtns.forEach(btn => {
+            const svg = btn.querySelector('svg');
+            if (svg) {
+              svg.classList.add('text-gray-300');
+              svg.classList.remove('text-yellow-400');
+            }
+            btn.classList.remove('border-yellow-400', 'bg-yellow-50');
+            btn.classList.add('border-gray-300');
+          });
+
+          // Recargar datos
+          setTimeout(() => {
+            cargarEstadisticas();
+            cargarResenas();
+          }, 2000);
+        } else {
+          mostrarMensaje(result.error || 'Error al enviar la reseña', 'error');
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enviar reseña';
+
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarMensaje('Error de conexión. Intenta de nuevo.', 'error');
+      }
+    });
+  }
+
+  function mostrarMensaje(texto, tipo) {
+    const mensaje = document.getElementById('mensaje');
+    if (!mensaje) return;
+    
+    mensaje.textContent = texto;
+    mensaje.className = `mt-4 p-4 rounded-lg ${
+      tipo === 'success' 
+        ? 'bg-green-100 text-green-800 border-2 border-green-300' 
+        : 'bg-red-100 text-red-800 border-2 border-red-300'
+    }`;
+    mensaje.classList.remove('hidden');
+
+    setTimeout(() => {
+      mensaje.classList.add('hidden');
+    }, 5000);
+  }
+</script>

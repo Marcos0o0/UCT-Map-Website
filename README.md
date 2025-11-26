@@ -27,7 +27,7 @@ Aplicación web que permite a estudiantes y visitantes explorar el campus UCT de
 
 ```bash
 # Clonar el repositorio
-git clone [URL_DEL_REPO]
+git clone https://github.com/Marcos0o0/UCT-Map-Website.git
 
 # Instalar dependencias
 npm install
